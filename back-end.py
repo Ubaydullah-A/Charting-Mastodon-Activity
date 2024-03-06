@@ -14,53 +14,59 @@ try:
 except:
     pass
 data_file.close()
-print(data)
-print("")
 
 # Ask user for instance
 instance = input("Please enter the URL of the instance you would like to monitor (such as https://mastodon.social/): ")
 
-while True:
+# Get new data via the API
+r = ""
+try:
+    r = get(instance + 'api/v1/instance/activity').json()
+except:
+    print("Unable to connect to the instance.\nPlease ensure that the URL is correct (including ending with '/'), that the instance is **NOT** in whitelist mode, and that you are connected to the internet.")
+    exit(1)
 
+while True:
+    failed_to_collect = False
     # Get new data via the API
     r = ""
+    print("Attempting to collect activity data.\nPlease do NOT terminate during this process.")
     try:
         r = get(instance + 'api/v1/instance/activity').json()
     except:
-        print("The URL is incorrect.\nPlease ensure that the URL is correct (including ending with '/') and that the instance is **NOT** in whitelist mode.")
-        exit(1)
-    print(r)
-    print("")
-    #print(len(r))
+        print("Unable to collect activity data:", datetime.now())
+        failed_to_collect = True
 
-    # Format data to avoid duplicate days
-    exists = False
-    for x in range(1, len(r)):
-        #print(r[x])
-        r[x]['week'] = datetime.fromtimestamp(int(r[x]['week'])).strftime("%Y/%m/%d")
-        for y in range(0, len(data)):
-            if r[x]['week'] == data[y]['week']:
-                exists = True
-                break
-        if not exists:
-            # Add a "count" key == 1
-            r[x]['count'] = '1'
-            data.append(r[x])
-        else:
-            # Sum old and new "statuses", "logins" and "registrations", and increment "count"
-            # This is used to handle data inconsistencies between requests
-            data[y]['statuses'] = str(int(data[y]['statuses']) + int(r[x]['statuses']))
-            data[y]['logins'] = str(int(data[y]['logins']) + int(r[x]['logins']))
-            data[y]['registrations'] = str(int(data[y]['registrations']) + int(r[x]['registrations']))
-            data[y]['count'] = str(int(data[y]['count']) + 1)
-            continue
-    print(data)
+    if not failed_to_collect:
+        # Format data to avoid duplicate days
+        exists = False
+        for x in range(1, len(r)):
+            r[x]['week'] = datetime.fromtimestamp(int(r[x]['week'])).strftime("%Y/%m/%d")
+            for y in range(0, len(data)):
+                if r[x]['week'] == data[y]['week']:
+                    exists = True
+                    break
+            if not exists:
+                # Add a "count" key == 1
+                r[x]['count'] = '1'
+                data.append(r[x])
+            else:
+                # Sum old and new "statuses", "logins" and "registrations", and increment "count"
+                # This is used to handle data inconsistencies between requests
+                data[y]['statuses'] = str(int(data[y]['statuses']) + int(r[x]['statuses']))
+                data[y]['logins'] = str(int(data[y]['logins']) + int(r[x]['logins']))
+                data[y]['registrations'] = str(int(data[y]['registrations']) + int(r[x]['registrations']))
+                data[y]['count'] = str(int(data[y]['count']) + 1)
+                continue
 
-    # Store new data
-    write_data = open('data', 'wb')
-    dump(data, write_data)
-    write_data.close()
+        # Store new data
+        try:
+            write_data = open('data', 'wb')
+            dump(data, write_data)
+            write_data.close()
+            print("Successfully collected activity data:", datetime.now())
+        except:
+            print("Failed to save the collected activity data:", datetime.now())
 
     # Ensures that the program only requests data once every 24 hours
-    print(datetime.now())
     sleep(86400)
