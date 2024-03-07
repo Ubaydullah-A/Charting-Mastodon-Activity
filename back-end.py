@@ -26,6 +26,8 @@ except:
     print("Unable to connect to the instance.\nPlease ensure that the URL is correct (including ending with '/'), that the instance is **NOT** in whitelist mode, and that you are connected to the internet.")
     exit(1)
 
+unix_timestamp = datetime.timestamp(datetime.now())
+
 while True:
     failed_to_collect = False
     # Get new data via the API
@@ -69,4 +71,5 @@ while True:
             print("Failed to save the collected activity data:", datetime.now())
 
     # Ensures that the program only requests data once every 24 hours
-    sleep(86400)
+    unix_timestamp += (24 * 60 * 60)
+    sleep(unix_timestamp - datetime.timestamp(datetime.now()))
