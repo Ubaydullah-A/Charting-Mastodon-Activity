@@ -13,7 +13,7 @@ matplotlib.use("TkAgg")
 def draw_figure(data_df, C, root):
     C.grid_remove()
     C = tk.Canvas(root, height = 250, width = 300)
-    C.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
+    C.grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
 
     x = np.arange(len(data_df))
     bar_width = 0.5
@@ -34,7 +34,7 @@ def draw_figure(data_df, C, root):
 
     figure_canvas_agg = FigureCanvasTkAgg(fig, C)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
+    figure_canvas_agg.get_tk_widget().grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
     return figure_canvas_agg
 
 def on_closing():
@@ -89,14 +89,21 @@ root.protocol("WM_DELETE_WINDOW", on_closing)
 C = tk.Canvas(root, height = 250, width = 300)
 C.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
 
+input_grid = tk.Canvas(root, height = 250, width = 300)
+input_grid.grid(row = 0, column = 0, columnspan = 2)
+
 draw_figure(data_df, C, root)
 
-entries_label = tk.Label(root, text = "Enter number of data entries to plot:", width = 37, anchor="sw")
+entries_label = tk.Label(input_grid, text = "Enter number of data entries to plot:", width = 37, anchor="sw")
 
-T = tk.Text(root, height = 1, pady = 5)#, width = 37)
-Display = tk.Button(root, height = 1, width = 20, text = "Enter", command = lambda:take_input(data, data_quantity, C, root))
+T = tk.Text(input_grid, height = 1, pady = 5)
+Display = tk.Button(input_grid, height = 1, width = 20, text = "Enter", command = lambda:take_input(data, data_quantity, C, root))
 entries_label.grid(row = 0, column = 0, sticky = "sw")
 T.grid(row = 1, column = 0, sticky = "w")
 Display.grid(row = 1, column = 1)
+
+root.grid_columnconfigure(0, weight = 1)
+root.grid_rowconfigure(0, weight = 1)
+root.grid_rowconfigure(1, weight = 1)
 
 root.mainloop()
