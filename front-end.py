@@ -9,16 +9,55 @@ from sys import exit
 
 matplotlib.use("TkAgg")
 
-def draw_figure(figure, canvas):
-    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+# Plot graph
+def draw_figure(data_df, C, root):
+    C.grid_remove()
+    C = tk.Canvas(root, height = 250, width = 300)
+    C.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
+
+    x = np.arange(len(data_df))
+    bar_width = 0.5
+    weeks = []
+    fig, ax = plt.subplots()
+
+    ax.grid(axis = 'y')
+
+    ax.bar(x*2, data_df['statuses'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "statuses")
+    ax.bar(x*2 + bar_width, data_df['logins'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "logins")
+    ax.bar(x*2 + bar_width + bar_width, data_df['registrations'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "registrations")
+
+    weeks = data_df['week']
+
+    ax.set_xticks(x*2 + bar_width)
+    ax.legend(loc="right")
+    ax.set_xticklabels(weeks, fontsize = 5, rotation = 45)
+
+    figure_canvas_agg = FigureCanvasTkAgg(fig, C)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().pack(side="top", fill="both", expand=1)
+    figure_canvas_agg.get_tk_widget().grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
     return figure_canvas_agg
 
 def on_closing():
     if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
         root.destroy()
         exit()
+
+# Create DataFrame
+def create_dataframe(data, data_quantity):
+    data_df = pd.DataFrame(data)
+    data_df = data_df.sort_values(by=['week'], ascending = False)
+    data_df = data_df.reset_index()
+    data_df = data_df.drop('index', axis=1)
+    data_df = data_df.head(data_quantity)
+    return data_df
+
+def take_input(data, data_quantity, C, root):
+    input_number = T.get("1.0", "end-1c")
+    if input_number.strip().isdigit():
+        if int(input_number.strip()) <= len(data) - 1:
+            data_quantity = int(input_number.strip())
+            data_df = create_dataframe(data, data_quantity)
+            draw_figure(data_df, C, root)
 
 # Get collected data
 file_check = open("data", "a")
@@ -31,36 +70,33 @@ except:
     pass
 data_file.close()
 
-# Create DataFrame
 data_df = pd.DataFrame(data)
 data_df = data_df.sort_values(by=['week'], ascending = False)
 data_df = data_df.reset_index()
 data_df = data_df.drop('index', axis=1)
+if len(data_df) < 12:
+    data_quantity = len(data_df)
+else:
+    data_quantity = 12
+
+data_df = create_dataframe(data, data_quantity)
 
 root = tk.Tk()
 root.title("Charting Mastodon Activity")
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
-# Plot graph
-x = np.arange(len(data_df))
-bar_width = 0.5
-weeks = []
+C = tk.Canvas(root, height = 250, width = 300)
+C.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
 
-fig, ax = plt.subplots(num='Activity graph')
+draw_figure(data_df, C, root)
 
-ax.grid(axis = 'y')
+entries_label = tk.Label(root, text = "Enter number of data entries to plot:", width = 37, anchor="sw")
 
-ax.bar(x*2, data_df['statuses'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "statuses")
-ax.bar(x*2 + bar_width, data_df['logins'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "logins")
-ax.bar(x*2 + bar_width + bar_width, data_df['registrations'].astype(int)/data_df['count'].astype(int), width = bar_width, label = "registrations")
-
-weeks = data_df['week']
-
-ax.set_xticks(x*2 + bar_width)
-ax.legend(loc="right")
-ax.set_xticklabels(weeks, fontsize=5, rotation=45)
-
-draw_figure(fig, root)
+T = tk.Text(root, height = 1, pady = 5)#, width = 37)
+Display = tk.Button(root, height = 1, width = 20, text = "Enter", command = lambda:take_input(data, data_quantity, C, root))
+entries_label.grid(row = 0, column = 0, sticky = "sw")
+T.grid(row = 1, column = 0, sticky = "w")
+Display.grid(row = 1, column = 1)
 
 root.mainloop()
