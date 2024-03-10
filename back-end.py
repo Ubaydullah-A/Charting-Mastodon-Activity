@@ -43,7 +43,9 @@ while True:
         # Format data to avoid duplicate days
         exists = False
         for x in range(1, len(r)):
-            r[x]['week'] = datetime.fromtimestamp(int(r[x]['week'])).strftime("%Y/%m/%d")
+            r[x]['week'] = datetime.fromtimestamp(int(r[x]['week'])).strftime("%d/%m/%Y")
+            temp = r[x]['week'].split("/")
+            r[x]['week'] = int(datetime.timestamp(datetime(int(temp[2]), int(temp[1]), int(temp[0]))))
             for y in range(0, len(data)):
                 if r[x]['week'] == data[y]['week']:
                     exists = True
