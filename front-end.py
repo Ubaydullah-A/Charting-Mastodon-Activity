@@ -1,3 +1,10 @@
+'''
+This program takes the activity data collected by the back-end and displays it 
+in a graph.
+
+To run this, use: python3 front-end.py
+'''
+
 import pickle
 import matplotlib
 import matplotlib.pyplot as plt
@@ -10,25 +17,31 @@ from datetime import datetime
 
 matplotlib.use('TkAgg')
 
-# Plot graph
-def draw_figure(data_df, C, root):
-    C.grid_remove()
-    C = tk.Canvas(root, height = 250, width = 300)
-    C.grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
+# Plot the graph.
+def draw_figure(data_df, graph_canvas, root):
+    # Remove the old graph.
+    graph_canvas.grid_remove()
+    graph_canvas = tk.Canvas(root, height = 250, width = 300)
+    graph_canvas.grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
 
+    # Create the new graph.
     fig, ax = plt.subplots()
     ax.grid()
  
+    # Plot the data on the graph.
     ax.plot(data_df['week'].to_numpy(), data_df['statuses'].to_numpy().astype(int)/data_df['count'].to_numpy().astype(int), label = 'statuses', marker = 'x')
     ax.plot(data_df['week'].to_numpy(), data_df['logins'].to_numpy().astype(int)/data_df['count'].to_numpy().astype(int), label = 'logins', marker = 'x')
     ax.plot(data_df['week'].to_numpy(), data_df['registrations'].to_numpy().astype(int)/data_df['count'].to_numpy().astype(int), label = 'registrations', marker = 'x')
 
+    # Create a graph legend.
     ax.legend(loc='best')
 
-    figure_canvas_agg = FigureCanvasTkAgg(fig, C)
+    # Draw the graph in order to get the x-axis labels.
+    figure_canvas_agg = FigureCanvasTkAgg(fig, graph_canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
 
+    # Replace the x-axis labels with dates rather than Unix timestamps.
     old_labels = [item.get_position() for item in ax.get_xticklabels()]
     labels = old_labels.copy()
     for label in range(0, len(labels)):
@@ -38,17 +51,19 @@ def draw_figure(data_df, C, root):
     ax.set_xticks(old_labels)
     ax.set_xticklabels(labels, rotation = 15)
 
-    figure_canvas_agg = FigureCanvasTkAgg(fig, C)
+    # Draw the final graph.
+    figure_canvas_agg = FigureCanvasTkAgg(fig, graph_canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().grid(row = 1, column = 0, columnspan = 2, rowspan = 2)
     return figure_canvas_agg
 
+# Ask for confirmation before closing the program.
 def on_closing():
     if tk.messagebox.askokcancel('Quit', 'Do you want to quit?'):
         root.destroy()
         exit()
 
-# Create DataFrame
+# Create the DataFrame.
 def create_dataframe(data, data_quantity):
     data_df = pd.DataFrame(data)
     data_df = data_df.sort_values(by=['week'], ascending = False)
@@ -57,25 +72,27 @@ def create_dataframe(data, data_quantity):
     data_df = data_df.head(data_quantity)
     return data_df
 
-def take_input(data, data_quantity, C, root):
-    input_number = T.get('1.0', 'end-1c')
+# Get the input from the entries text box.
+def take_entries_input(data, data_quantity, graph_canvas, root):
+    input_number = entries_text_box.get('1.0', 'end-1c')
     if input_number.strip().isdigit():
         if int(input_number.strip()) <= len(data) - 1 and int(input_number.strip()) > 1:
             data_quantity = int(input_number.strip())
             data_df = create_dataframe(data, data_quantity)
-            draw_figure(data_df, C, root)
+            draw_figure(data_df, graph_canvas, root)
 
-# Get collected data
+# Get the collected data.
 file_check = open('data', 'a')
 file_check.close()
-data_file = open('data', 'rb')
 data = []
 try:
+    data_file = open('data', 'rb')
     data = pickle.load(data_file)
+    data_file.close()
 except:
     pass
-data_file.close()
 
+# Create a DataFrame to set an initial value for data_quantity.
 data_df = pd.DataFrame(data)
 data_df = data_df.sort_values(by=['week'], ascending = False)
 data_df = data_df.reset_index()
@@ -85,29 +102,36 @@ if len(data_df) < 12:
 else:
     data_quantity = 12
 
+# Create the inital DataFrame using the data_quantity limit.
 data_df = create_dataframe(data, data_quantity)
 
+# Create the window. 
 root = tk.Tk()
 root.title('Charting Mastodon Activity')
 
+# Set the 'x' on the windoiw to call the on_closing function.
 root.protocol('WM_DELETE_WINDOW', on_closing)
 
-C = tk.Canvas(root, height = 250, width = 300)
-C.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
+# Create the initial canvas that the graph will be displayed on.
+graph_canvas = tk.Canvas(root, height = 250, width = 300)
+graph_canvas.grid(row = 2, column = 0, columnspan = 2, rowspan = 2)
 
+# Create the canvas for getting inputs from the user.
 input_grid = tk.Canvas(root, height = 250, width = 300)
 input_grid.grid(row = 0, column = 0, columnspan = 2)
 
-draw_figure(data_df, C, root)
+# Create the initial graph.
+draw_figure(data_df, graph_canvas, root)
 
+# Create the elements for the input_grid canvas.
 entries_label = tk.Label(input_grid, text = 'Enter number of data entries to plot:', width = 37, anchor='sw')
-
-T = tk.Text(input_grid, height = 1, pady = 5)
-Display = tk.Button(input_grid, height = 1, width = 20, text = 'Enter', command = lambda:take_input(data, data_quantity, C, root))
+entries_text_box = tk.Text(input_grid, height = 1, pady = 5)
+entries_button = tk.Button(input_grid, height = 1, width = 20, text = 'Enter', command = lambda:take_entries_input(data, data_quantity, graph_canvas, root))
 entries_label.grid(row = 0, column = 0, sticky = 'sw')
-T.grid(row = 1, column = 0, sticky = 'w')
-Display.grid(row = 1, column = 1)
+entries_text_box.grid(row = 1, column = 0, sticky = 'w')
+entries_button.grid(row = 1, column = 1)
 
+# Ensure that the elements in the window scale appropriately.
 root.grid_columnconfigure(0, weight = 1)
 root.grid_rowconfigure(0, weight = 1)
 root.grid_rowconfigure(1, weight = 1)
