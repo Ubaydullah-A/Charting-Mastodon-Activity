@@ -32,8 +32,8 @@ try:
     requested_data = get(instance + 'api/v1/instance/activity').json()
 except exceptions.RequestException:
     raise SystemExit('Unable to connect to the instance.\nPlease ensure ' +
-                     'that the URL is correct (including ending with \'/\'), ' +
-                     'that the instance is **NOT** in whitelist mode, and ' +
+                     'that the URL is correct (including ending with \'/\'),' +
+                     ' that the instance is **NOT** in whitelist mode, and ' +
                      'that you are connected to the internet.')
 
 unix_timestamp = datetime.timestamp(datetime.now())
