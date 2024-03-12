@@ -19,7 +19,7 @@ matplotlib.use('TkAgg')
 
 
 # Plot the graph.
-def draw_figure(data_df, graph_canvas, root):
+def draw_figure(data_df, graph_canvas, root, save):
     # Remove the old graph.
     graph_canvas.grid_remove()
     graph_canvas = tk.Canvas(root, height=250, width=300)
@@ -89,14 +89,14 @@ def create_dataframe(data, data_quantity):
 
 
 # Get the input from the entries text box.
-def take_entries_input(data, data_quantity, graph_canvas, root):
+def take_entries_input(data, data_quantity, graph_canvas, root, save):
     input_number = entries_text_box.get('1.0', 'end-1c')
     if input_number.strip().isdigit():
         if int(input_number.strip()) <= len(data) - 1 \
                 and int(input_number.strip()) > 0:
             data_quantity = int(input_number.strip())
             data_df = create_dataframe(data, data_quantity)
-            draw_figure(data_df, graph_canvas, root)
+            draw_figure(data_df, graph_canvas, root, save)
 
 
 # Get the collected data.
@@ -139,7 +139,7 @@ input_grid = tk.Canvas(root, height=250, width=300)
 input_grid.grid(row=0, column=0, columnspan=2)
 
 # Create the initial graph.
-draw_figure(data_df, graph_canvas, root)
+draw_figure(data_df, graph_canvas, root, False)
 
 # Create the elements for the input_grid canvas.
 entries_label = tk.Label(input_grid,
@@ -149,10 +149,15 @@ entries_text_box = tk.Text(input_grid, height=1, pady=5)
 entries_button = tk.Button(input_grid, height=1, width=20, text='Enter',
                            command=lambda:
                            take_entries_input(data, data_quantity,
-                                              graph_canvas, root))
+                                              graph_canvas, root, False))
+save_button = tk.Button(input_grid, height=1, width=20, text='Save graph',
+                           command=lambda:
+                           take_entries_input(data, data_quantity,
+                                              graph_canvas, root, True))
 entries_label.grid(row=0, column=0, sticky='sw')
 entries_text_box.grid(row=1, column=0, sticky='w')
 entries_button.grid(row=1, column=1)
+save_button.grid(row=0, column=1)
 
 # Ensure that the elements in the window scale appropriately.
 root.grid_columnconfigure(0, weight=1)
