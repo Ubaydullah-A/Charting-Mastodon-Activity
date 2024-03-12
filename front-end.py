@@ -68,6 +68,8 @@ def draw_figure(data_df, graph_canvas, root, save):
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().grid(row=1, column=0, columnspan=2,
                                            rowspan=2)
+    if save:
+        fig.savefig("graph.png")
     return figure_canvas_agg
 
 
@@ -95,8 +97,8 @@ def take_entries_input(data, data_quantity, graph_canvas, root, save):
         if int(input_number.strip()) <= len(data) - 1 \
                 and int(input_number.strip()) > 0:
             data_quantity = int(input_number.strip())
-            data_df = create_dataframe(data, data_quantity)
-            draw_figure(data_df, graph_canvas, root, save)
+    data_df = create_dataframe(data, data_quantity)
+    draw_figure(data_df, graph_canvas, root, save)
 
 
 # Get the collected data.
