@@ -20,6 +20,8 @@ matplotlib.use('TkAgg')
 
 # Plot the graph.
 def draw_figure(data_df, graph_canvas, root, file_name, save):
+    print(show_statuses.get())
+
     # Remove the old graph.
     graph_canvas.grid_remove()
     graph_canvas = tk.Canvas(root, height=250, width=300)
@@ -93,17 +95,26 @@ def create_dataframe(data, data_quantity):
     return data_df
 
 
-# Get the input from the entries text box.
-def take_entries_input(data, data_quantity, graph_canvas, root, save):
+# Get the inputs from the entries text box.
+def get_inputs(data, data_quantity, graph_canvas, root, save):
     input_number = entries_text_box.get('1.0', 'end-1c')
     file_name = save_text_box.get('1.0', 'end-1c')
     if input_number.strip().isdigit():
         if int(input_number.strip()) <= len(data) - 1 \
                 and int(input_number.strip()) > 0:
-            data_quantity = int(input_number.strip())
-    data_df = create_dataframe(data, data_quantity)
+            data_quantity.set(int(input_number.strip()))
+    data_df = create_dataframe(data, data_quantity.get())
     draw_figure(data_df, graph_canvas, root, file_name, save)
 
+
+# Create the window.
+root = tk.Tk()
+root.title('Charting Mastodon Activity')
+
+# Set the 'x' on the windoiw to call the on_closing function.
+root.protocol('WM_DELETE_WINDOW', on_closing)
+
+show_statuses = tk.BooleanVar()
 
 # Get the collected data.
 file_check = open('data', 'a')
@@ -117,24 +128,18 @@ except Exception:
     pass
 
 # Create a DataFrame to set an initial value for data_quantity.
+data_quantity = tk.IntVar()
 data_df = pd.DataFrame(data)
 data_df = data_df.sort_values(by=['week'], ascending=False)
 data_df = data_df.reset_index()
 data_df = data_df.drop('index', axis=1)
 if len(data_df) < 12:
-    data_quantity = len(data_df)
+    data_quantity.set(len(data_df))
 else:
-    data_quantity = 12
+    data_quantity.set(12)
 
 # Create the inital DataFrame using the data_quantity limit.
-data_df = create_dataframe(data, data_quantity)
-
-# Create the window.
-root = tk.Tk()
-root.title('Charting Mastodon Activity')
-
-# Set the 'x' on the windoiw to call the on_closing function.
-root.protocol('WM_DELETE_WINDOW', on_closing)
+data_df = create_dataframe(data, data_quantity.get())
 
 # Create the initial canvas that the graph will be displayed on.
 graph_canvas = tk.Canvas(root, height=250, width=300)
@@ -144,9 +149,6 @@ graph_canvas.grid(row=2, column=0, columnspan=2, rowspan=2)
 input_grid = tk.Canvas(root, height=250, width=300)
 input_grid.grid(row=0, column=0, columnspan=2)
 
-# Create the initial graph.
-draw_figure(data_df, graph_canvas, root, '', False)
-
 # Create the elements for the input_grid canvas.
 entries_label = tk.Label(input_grid,
                          text='Enter number of data entries to plot:',
@@ -154,7 +156,7 @@ entries_label = tk.Label(input_grid,
 entries_text_box = tk.Text(input_grid, height=1, pady=5)
 entries_button = tk.Button(input_grid, height=1, width=20, text='Enter',
                            command=lambda:
-                           take_entries_input(data, data_quantity,
+                           get_inputs(data, data_quantity,
                                               graph_canvas, root, False))
 
 save_label = tk.Label(input_grid,
@@ -163,8 +165,11 @@ save_label = tk.Label(input_grid,
 save_text_box = tk.Text(input_grid, height=1, pady=5)
 save_button = tk.Button(input_grid, height=1, width=20, text='Save graph',
                         command=lambda:
-                        take_entries_input(data, data_quantity,
+                        get_inputs(data, data_quantity,
                                            graph_canvas, root, True))
+
+statuses_checkbox = tk.Checkbutton(input_grid, text='Show statuses', variable=show_statuses, onvalue=True, offvalue=False)
+statuses_checkbox.select()
 
 entries_label.grid(row=0, column=0, sticky='sw')
 entries_text_box.grid(row=1, column=0, sticky='w')
@@ -174,9 +179,14 @@ save_label.grid(row=2, column=0, sticky='sw')
 save_text_box.grid(row=3, column=0, sticky='w')
 save_button.grid(row=3, column=1)
 
+statuses_checkbox.grid(row=4, column=0)
+
 # Ensure that the elements in the window scale appropriately.
 root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0, weight=1)
 root.grid_rowconfigure(1, weight=1)
+
+# Create the initial graph.
+draw_figure(data_df, graph_canvas, root, '', False)
 
 root.mainloop()
