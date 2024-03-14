@@ -20,38 +20,40 @@ matplotlib.use('TkAgg')
 
 # Plot the graph.
 def draw_figure(data_df, graph_canvas, root, file_name, save):
-    print(show_statuses.get())
-
     # Remove the old graph.
     graph_canvas.grid_remove()
     graph_canvas = tk.Canvas(root, height=250, width=300)
-    graph_canvas.grid(row=1, column=0, columnspan=2, rowspan=2)
+    graph_canvas.grid(row=2, column=0, columnspan=2, rowspan=2)
 
     # Create the new graph.
     fig, ax = plt.subplots()
     ax.grid()
 
     # Plot the data on the graph.
-    ax.plot(data_df['week'].to_numpy(),
-            data_df['statuses'].to_numpy().astype(int) /
-            data_df['count'].to_numpy().astype(int),
-            label='statuses', marker='x')
-    ax.plot(data_df['week'].to_numpy(),
-            data_df['logins'].to_numpy().astype(int) /
-            data_df['count'].to_numpy().astype(int),
-            label='logins', marker='x')
-    ax.plot(data_df['week'].to_numpy(),
-            data_df['registrations'].to_numpy().astype(int) /
-            data_df['count'].to_numpy().astype(int),
-            label='registrations', marker='x')
+    if show_statuses.get():
+        ax.plot(data_df['week'].to_numpy(),
+                data_df['statuses'].to_numpy().astype(int) /
+                data_df['count'].to_numpy().astype(int),
+                label='statuses', marker='x')
+    if show_logins.get():
+        ax.plot(data_df['week'].to_numpy(),
+                data_df['logins'].to_numpy().astype(int) /
+                data_df['count'].to_numpy().astype(int),
+                label='logins', marker='x')
+    if show_registrations.get():
+        ax.plot(data_df['week'].to_numpy(),
+                data_df['registrations'].to_numpy().astype(int) /
+                data_df['count'].to_numpy().astype(int),
+                label='registrations', marker='x')
 
     # Create a graph legend.
-    ax.legend(loc='best')
+    if show_statuses.get() or show_logins.get() or show_registrations.get():
+        ax.legend(loc='best')
 
     # Draw the graph in order to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, graph_canvas)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=1, column=0, columnspan=2,
+    figure_canvas_agg.get_tk_widget().grid(row=0, column=0, columnspan=2,
                                            rowspan=2)
 
     # Replace the x-axis labels with dates rather than Unix timestamps.
@@ -68,7 +70,7 @@ def draw_figure(data_df, graph_canvas, root, file_name, save):
     # Draw the final graph.
     figure_canvas_agg = FigureCanvasTkAgg(fig, graph_canvas)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=1, column=0, columnspan=2,
+    figure_canvas_agg.get_tk_widget().grid(row=0, column=0, columnspan=2,
                                            rowspan=2)
     if save:
         if file_name != '':
@@ -114,7 +116,10 @@ root.title('Charting Mastodon Activity')
 # Set the 'x' on the windoiw to call the on_closing function.
 root.protocol('WM_DELETE_WINDOW', on_closing)
 
+# Create the reuired variables for the checkboxes.
 show_statuses = tk.BooleanVar()
+show_logins = tk.BooleanVar()
+show_registrations = tk.BooleanVar()
 
 # Get the collected data.
 file_check = open('data', 'a')
@@ -147,17 +152,17 @@ graph_canvas.grid(row=2, column=0, columnspan=2, rowspan=2)
 
 # Create the canvas for getting inputs from the user.
 input_grid = tk.Canvas(root, height=250, width=300)
-input_grid.grid(row=0, column=0, columnspan=2)
+input_grid.grid(row=0, column=0, columnspan=2, rowspan=2)
 
 # Create the elements for the input_grid canvas.
 entries_label = tk.Label(input_grid,
                          text='Enter number of data entries to plot:',
                          width=37, anchor='sw')
 entries_text_box = tk.Text(input_grid, height=1, pady=5)
-entries_button = tk.Button(input_grid, height=1, width=20, text='Enter',
+entries_button = tk.Button(input_grid, height=3, width=20, text='Enter',
                            command=lambda:
                            get_inputs(data, data_quantity,
-                                              graph_canvas, root, False))
+                                      graph_canvas, root, False))
 
 save_label = tk.Label(input_grid,
                       text='Enter the file name you want the gaph to be ' +
@@ -166,20 +171,40 @@ save_text_box = tk.Text(input_grid, height=1, pady=5)
 save_button = tk.Button(input_grid, height=1, width=20, text='Save graph',
                         command=lambda:
                         get_inputs(data, data_quantity,
-                                           graph_canvas, root, True))
+                                   graph_canvas, root, True))
 
-statuses_checkbox = tk.Checkbutton(input_grid, text='Show statuses', variable=show_statuses, onvalue=True, offvalue=False)
-statuses_checkbox.select()
+checkbox_grid = tk.Canvas(input_grid, height=250, width=300)
 
+# Add the elements to the input_grid canvas.
 entries_label.grid(row=0, column=0, sticky='sw')
 entries_text_box.grid(row=1, column=0, sticky='w')
-entries_button.grid(row=1, column=1)
+entries_button.grid(row=1, column=1, rowspan=2)
 
-save_label.grid(row=2, column=0, sticky='sw')
-save_text_box.grid(row=3, column=0, sticky='w')
-save_button.grid(row=3, column=1)
+checkbox_grid.grid(row=2, column=0, sticky='n')
 
-statuses_checkbox.grid(row=4, column=0)
+save_label.grid(row=3, column=0, sticky='sw')
+save_text_box.grid(row=4, column=0, sticky='w')
+save_button.grid(row=4, column=1)
+
+# Create the checkboxes that will determine if a metric is shown.
+statuses_checkbox = tk.Checkbutton(checkbox_grid, text='Show statuses',
+                                   variable=show_statuses, onvalue=True,
+                                   offvalue=False)
+statuses_checkbox.select()
+logins_checkbox = tk.Checkbutton(checkbox_grid, text='Show logins',
+                                 variable=show_logins, onvalue=True,
+                                 offvalue=False)
+logins_checkbox.select()
+registrations_checkbox = tk.Checkbutton(checkbox_grid,
+                                        text='Show registrations',
+                                        variable=show_registrations,
+                                        onvalue=True, offvalue=False)
+registrations_checkbox.select()
+
+# Add the checkboxes to the checkbox_grid canvas.
+statuses_checkbox.grid(row=0, column=0)
+logins_checkbox.grid(row=0, column=1)
+registrations_checkbox.grid(row=0, column=2)
 
 # Ensure that the elements in the window scale appropriately.
 root.grid_columnconfigure(0, weight=1)
