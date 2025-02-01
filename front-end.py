@@ -16,12 +16,13 @@ from sys import exit
 from datetime import datetime
 import time
 import tkcalendar
+from tkinter import ttk
 
 matplotlib.use('TkAgg')
 
 
 # Plot the graph.
-def draw_figure(data_df, root, file_name, save):
+def draw_figure(data_df, frame, file_name, save):
     # Remove the old graph.
     global figure_canvas_agg
     figure_canvas_agg.get_tk_widget().destroy()
@@ -59,9 +60,9 @@ def draw_figure(data_df, root, file_name, save):
         ax.legend(loc='best')
 
     # Draw the graph in order to get the x-axis labels.
-    figure_canvas_agg = FigureCanvasTkAgg(fig, root)
+    figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=2, column=0, columnspan=2, rowspan=2)
+    figure_canvas_agg.get_tk_widget().grid(row=2, column=0)
 
     # Replace the x-axis labels with dates rather than Unix timestamps.
     old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -96,7 +97,7 @@ def create_dataframe(data):
 
 
 # Get the inputs from the entries text box.
-def get_inputs(data, root, save):
+def get_inputs(data, frame, save):
     # Get the file name.
     file_name = save_text_box.get('1.0', 'end-1c')
     # Create a new DataFrame which only contains the data between midnight of
@@ -111,7 +112,18 @@ def get_inputs(data, root, save):
     limit2 += (24 * 60 * 60)
     data_df = data_df[data_df['week'].astype(int) >= limit1]
     data_df = data_df[data_df['week'].astype(int) < limit2]
-    draw_figure(data_df, root, file_name, save)
+    draw_figure(data_df, frame, file_name, save)
+
+
+# Adjust the region that can be scrolled when the information dislayed on the window is changed.
+def on_frame_configure(event):
+    canvas.configure(scrollregion=canvas.bbox('all'))
+
+
+# Resize the canvas to the correct size when the window changes size.
+def resize_canvas(event):
+    canvas.config(width=frame.winfo_width(), height=frame.winfo_height())
+
 
 # Create the window.
 root = tk.Tk()
@@ -120,7 +132,27 @@ root.title('Charting Mastodon Activity')
 # Set the 'x' on the window to call the on_closing function.
 root.protocol('WM_DELETE_WINDOW', on_closing)
 
-# Create the reuired variables for the checkboxes.
+# Create the canvas for the window.
+canvas = tk.Canvas(root, highlightthickness=0)
+canvas.grid(row=0, column=0, sticky='n')
+
+# Create the frame for grouping the other widgets together.
+frame = tk.Frame(canvas)
+canvas.create_window((0, 0), window=frame)
+
+# Create the scroll bars.
+vertical_scroll_bar = ttk.Scrollbar(root, orient='vertical', command=canvas.yview)
+vertical_scroll_bar.grid(row=0, column=1, sticky='ns')
+
+horizontal_scroll_bar = ttk.Scrollbar(root, orient='horizontal', command=canvas.xview)
+horizontal_scroll_bar.grid(row=1, column=0, sticky='ew')
+
+# Configure the canvas to allow for scrolling.
+canvas.configure(yscrollcommand=vertical_scroll_bar.set, xscrollcommand=horizontal_scroll_bar.set)
+
+frame.bind('<Configure>', on_frame_configure)
+
+# Create the required variables for the checkboxes.
 show_statuses = tk.BooleanVar()
 show_logins = tk.BooleanVar()
 show_registrations = tk.BooleanVar()
@@ -151,8 +183,8 @@ data_df = create_dataframe(data)
 data_df = data_df.head(data_quantity)
 
 # Create the frame for getting inputs from the user.
-input_grid = tk.Frame(root, height=250, width=300)
-input_grid.grid(row=0, column=0, columnspan=2, rowspan=2)
+input_grid = tk.Frame(frame, height=250, width=300)
+input_grid.grid(row=0, column=0)
 
 # Create the initial graph.
 fig, ax = plt.subplots()
@@ -176,9 +208,9 @@ ax.plot(data_df['week'].to_numpy(),
 ax.legend(loc='best')
 
 # Draw the graph in order to get the x-axis labels.
-figure_canvas_agg = FigureCanvasTkAgg(fig, root)
+figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
 figure_canvas_agg.draw()
-figure_canvas_agg.get_tk_widget().grid(row=2, column=0, rowspan=2, columnspan=2)
+figure_canvas_agg.get_tk_widget().grid(row=2, column=0)
 
 # Replace the x-axis labels with dates rather than Unix timestamps.
 old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -198,7 +230,7 @@ entries_label = tk.Label(input_grid,
 
 entries_button = tk.Button(input_grid, height=6, width=20, text='Enter',
                            command=lambda:
-                           get_inputs(data, root, False))
+                           get_inputs(data, frame, False))
 
 save_label = tk.Label(input_grid,
                       text='\nEnter the file name you want the graph to be ' +
@@ -206,7 +238,7 @@ save_label = tk.Label(input_grid,
 save_text_box = tk.Text(input_grid, height=1, pady=5)
 save_button = tk.Button(input_grid, height=1, width=20, text='Save graph',
                         command=lambda:
-                        get_inputs(data, root, True))
+                        get_inputs(data, frame, True))
 
 # Create the frame for the start and end date selection.
 dates_grid = tk.Frame(input_grid, height=50, width=300)
@@ -226,7 +258,7 @@ entries_button.grid(row=1, column=1, rowspan=4)
 
 checkbox_grid.grid(row=2, column=0, sticky='n')
 
-graph_size_grid.grid(row=3, column=0, rowspan=2)
+graph_size_grid.grid(row=3, column=0)
 
 save_label.grid(row=5, column=0, sticky='sw')
 save_text_box.grid(row=6, column=0, sticky='w')
@@ -280,6 +312,13 @@ date2.grid(row=0, column=1)
 # Ensure that the elements in the window scale appropriately.
 root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0, weight=1)
-root.grid_rowconfigure(1, weight=1)
+
+# Set the initial window size.
+starting_width = frame.winfo_width()+16
+starting_height = frame.winfo_height()+16
+root.geometry(f'{starting_width}x{starting_height}')
+
+# Call the resize_canvas function when the window changes size.
+root.bind('<Configure>', resize_canvas)
 
 root.mainloop()
