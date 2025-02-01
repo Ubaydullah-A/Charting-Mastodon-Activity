@@ -2,7 +2,7 @@
 
 ## Installing the required software
 - Download the files from the repository.
-- Ensure Python is installed. Python 3.10.12 was used to create the programs.
+- Ensure Python is installed. Python 3.12.3 was used to create the programs.
 - Install the required packages using: pip3 install -r requirements.txt
 
 ## Running the programs
