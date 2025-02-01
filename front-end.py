@@ -115,7 +115,8 @@ def get_inputs(data, frame, save):
     draw_figure(data_df, frame, file_name, save)
 
 
-# Adjust the region that can be scrolled when the information dislayed on the window is changed.
+# Adjust the region that can be scrolled when the information dislayed on the
+# window is changed.
 def on_frame_configure(event):
     canvas.configure(scrollregion=canvas.bbox('all'))
 
@@ -141,14 +142,17 @@ frame = tk.Frame(canvas)
 canvas.create_window((0, 0), window=frame)
 
 # Create the scroll bars.
-vertical_scroll_bar = ttk.Scrollbar(root, orient='vertical', command=canvas.yview)
+vertical_scroll_bar = ttk.Scrollbar(root, orient='vertical',
+                                    command=canvas.yview)
 vertical_scroll_bar.grid(row=0, column=1, sticky='ns')
 
-horizontal_scroll_bar = ttk.Scrollbar(root, orient='horizontal', command=canvas.xview)
+horizontal_scroll_bar = ttk.Scrollbar(root, orient='horizontal',
+                                      command=canvas.xview)
 horizontal_scroll_bar.grid(row=1, column=0, sticky='ew')
 
 # Configure the canvas to allow for scrolling.
-canvas.configure(yscrollcommand=vertical_scroll_bar.set, xscrollcommand=horizontal_scroll_bar.set)
+canvas.configure(yscrollcommand=vertical_scroll_bar.set,
+                 xscrollcommand=horizontal_scroll_bar.set)
 
 frame.bind('<Configure>', on_frame_configure)
 
@@ -285,9 +289,11 @@ logins_checkbox.grid(row=0, column=1)
 registrations_checkbox.grid(row=0, column=2)
 
 # Create the elements for the graph_size_grid frame.
-width_label = tk.Label(graph_size_grid, text='Enter the width of the graph in inches (optional):')
+width_label = tk.Label(graph_size_grid, text='Enter the width of the graph ' +
+                       'in inches (optional):')
 width_text_box = tk.Text(graph_size_grid, height=1, width=39, pady=5)
-height_label = tk.Label(graph_size_grid, text='Enter the height of the graph in inches (optional):')
+height_label = tk.Label(graph_size_grid, text='Enter the height of the graph' +
+                        ' in inches (optional):')
 height_text_box = tk.Text(graph_size_grid, height=1, width=40, pady=5)
 
 # Add the checkboxes to the graph_size_grid frame.
@@ -301,7 +307,9 @@ start_date = datetime.fromtimestamp(float(old_labels[0])).strftime('%d/%m/%Y')
 date1 = tkcalendar.DateEntry(dates_grid, width=38)
 date1.set_date(start_date)
 
-end_date = datetime.fromtimestamp(float(old_labels[len(old_labels)-1])).strftime('%d/%m/%Y')
+end_date = datetime.fromtimestamp(float(
+                                  old_labels[len(
+                                    old_labels)-1])).strftime('%d/%m/%Y')
 date2 = tkcalendar.DateEntry(dates_grid, width=39)
 date2.set_date(end_date)
 
