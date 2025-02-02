@@ -10,17 +10,8 @@ from pickle import load, dump
 from datetime import datetime
 from sys import exit
 from time import sleep
-
-# Get the previously collected data.
-file_check = open('data', 'a')
-file_check.close()
-data = []
-try:
-    data_file = open('data', 'rb')
-    data = load(data_file)
-    data_file.close()
-except Exception:
-    pass
+from urllib.parse import urlparse
+from os import mkdir
 
 # Ask user for instance.
 instance = input('Please enter the URL of the instance you would like to ' +
@@ -37,6 +28,23 @@ except exceptions.RequestException:
                      'that you are connected to the internet.')
 
 unix_timestamp = datetime.timestamp(datetime.now())
+
+# Get the previously collected data.
+file_name = urlparse(instance)
+try:
+    file_check = open('./data/' + file_name.netloc, 'a')
+    file_check.close()
+except Exception:
+    mkdir('data')
+    file_check = open('./data/' + file_name.netloc, 'a')
+    file_check.close()
+data = []
+try:
+    data_file = open('./data/' + file_name.netloc, 'rb')
+    data = load(data_file)
+    data_file.close()
+except Exception:
+    pass
 
 while True:
     failed_to_collect = False
@@ -90,7 +98,7 @@ while True:
 
         # Store new data.
         try:
-            write_data = open('data', 'wb')
+            write_data = open('./data/' + file_name.netloc, 'wb')
             dump(data, write_data)
             write_data.close()
             print('Successfully collected activity data:', datetime.now())

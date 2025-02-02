@@ -17,6 +17,7 @@ from datetime import datetime
 import time
 import tkcalendar
 from tkinter import ttk
+from os import listdir
 
 matplotlib.use('TkAgg')
 
@@ -162,11 +163,15 @@ show_logins = tk.BooleanVar()
 show_registrations = tk.BooleanVar()
 
 # Get the collected data.
-file_check = open('data', 'a')
-file_check.close()
+try:
+    file_check = open('./data/' + listdir('./data')[0], 'a')
+    file_check.close()
+except Exception:
+    raise SystemExit('No data has been collected.')
+
 data = []
 try:
-    data_file = open('data', 'rb')
+    data_file = open('./data/' + listdir('./data')[0], 'rb')
     data = pickle.load(data_file)
     data_file.close()
 except Exception:
