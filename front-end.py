@@ -23,9 +23,9 @@ matplotlib.use('TkAgg')
 
 
 # Plot the graph.
-def draw_figure(data_df, frame, file_name, save):
+def draw_figure(data_df_array, frame, file_name, save):
     # Remove the old graph.
-    global figure_canvas_agg
+    global figure_canvas_agg, selected_instances
     figure_canvas_agg.get_tk_widget().destroy()
     plt.close('all')
 
@@ -40,25 +40,32 @@ def draw_figure(data_df, frame, file_name, save):
         fig.set_figheight(int(height_value))
 
     # Plot the data on the graph.
-    if show_statuses.get():
-        ax.plot(data_df['week'].to_numpy(),
-                data_df['statuses'].to_numpy().astype(int) /
-                data_df['count'].to_numpy().astype(int),
-                label='statuses', marker='x')
-    if show_logins.get():
-        ax.plot(data_df['week'].to_numpy(),
-                data_df['logins'].to_numpy().astype(int) /
-                data_df['count'].to_numpy().astype(int),
-                label='logins', marker='x')
-    if show_registrations.get():
-        ax.plot(data_df['week'].to_numpy(),
-                data_df['registrations'].to_numpy().astype(int) /
-                data_df['count'].to_numpy().astype(int),
-                label='registrations', marker='x')
+    for index in range(len(data_df_array)):
+        for i in range(len(selected_instances)):
+            if selected_instances[i][0] == data_df_array[index][0] and selected_instances[i][1] == 1:
+                if show_statuses.get():
+                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                            data_df_array[index][1]['statuses'].to_numpy().astype(int) /
+                            data_df_array[index][1]['count'].to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' statuses', marker='x')
+                if show_logins.get():
+                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                            data_df_array[index][1]['logins'].to_numpy().astype(int) /
+                            data_df_array[index][1]['count'].to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' logins', marker='x')
+                if show_registrations.get():
+                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                            data_df_array[index][1]['registrations'].to_numpy().astype(int) /
+                            data_df_array[index][1]['count'].to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' registrations', marker='x')
+                break
 
     # Create a graph legend.
     if show_statuses.get() or show_logins.get() or show_registrations.get():
-        ax.legend(loc='best')
+        for i in range(len(selected_instances)):
+            if selected_instances[i][1] == 1:
+                ax.legend(loc='best')
+                break
 
     # Draw the graph in order to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
@@ -90,11 +97,19 @@ def on_closing():
 
 # Create the DataFrame.
 def create_dataframe(data):
-    data_df = pd.DataFrame(data)
-    data_df = data_df.sort_values(by=['week'], ascending=False)
-    data_df = data_df.reset_index()
-    data_df = data_df.drop('index', axis=1)
-    return data_df
+    global selected_instances
+    data_df_array = []
+    for i in range(len(selected_instances)):
+        if selected_instances[i][1] == 1:
+            for index in range(len(data)):
+                if selected_instances[i][0] == data[index][0]:
+                    break
+            data_df = pd.DataFrame(data[index][1])
+            data_df = data_df.sort_values(by=['week'], ascending=False)
+            data_df = data_df.reset_index()
+            data_df = data_df.drop('index', axis=1)
+            data_df_array.append([selected_instances[i][0], data_df])
+    return data_df_array
 
 
 # Get the inputs from the entries text box.
@@ -103,7 +118,7 @@ def get_inputs(data, frame, save):
     file_name = save_text_box.get('1.0', 'end-1c')
     # Create a new DataFrame which only contains the data between midnight of
     # the earlier date and just before the end of the later date.
-    data_df = create_dataframe(data)
+    data_df_array = create_dataframe(data)
     limit1 = int(time.mktime(time.strptime(date1.get(), '%d/%m/%Y')))
     limit2 = int(time.mktime(time.strptime(date2.get(), '%d/%m/%Y')))
     if limit1 > limit2:
@@ -111,9 +126,10 @@ def get_inputs(data, frame, save):
         limit1 = limit2
         limit2 = temp
     limit2 += (24 * 60 * 60)
-    data_df = data_df[data_df['week'].astype(int) >= limit1]
-    data_df = data_df[data_df['week'].astype(int) < limit2]
-    draw_figure(data_df, frame, file_name, save)
+    for index in range(len(data_df_array)):
+        data_df_array[index][1] = data_df_array[index][1][data_df['week'].astype(int) >= limit1]
+        data_df_array[index][1] = data_df_array[index][1][data_df['week'].astype(int) < limit2]
+    draw_figure(data_df_array, frame, file_name, save)
 
 
 # Adjust the region that can be scrolled when the information dislayed on the
@@ -125,6 +141,19 @@ def on_frame_configure(event):
 # Resize the canvas to the correct size when the window changes size.
 def resize_canvas(event):
     canvas.config(width=frame.winfo_width(), height=frame.winfo_height())
+
+
+# Track which instances have been selected by updating the selected_instances array.
+def instance_changed(event):
+    global selected_instances
+    for index in range(len(selected_instances)):
+        if selected_instances[index][0] == instance_chosen.get():
+            if selected_instances[index][1] == 0:
+                selected_instances[index][1] = 1
+            else:
+                selected_instances[index][1] = 0
+            break
+    get_inputs(data, frame, False)
 
 
 # Create the window.
@@ -162,23 +191,31 @@ show_statuses = tk.BooleanVar()
 show_logins = tk.BooleanVar()
 show_registrations = tk.BooleanVar()
 
-# Get the collected data.
+# Check if data has been collected.
 try:
     file_check = open('./data/' + listdir('./data')[0], 'a')
     file_check.close()
 except Exception:
     raise SystemExit('No data has been collected.')
 
+# Create the array that tracks which instances have been selected.
+selected_instances = []
+for x in listdir('./data'):
+    selected_instances.append([x, 0])
+selected_instances[0][1] = 1
+
+# Get the collected data.
 data = []
-try:
-    data_file = open('./data/' + listdir('./data')[0], 'rb')
-    data = pickle.load(data_file)
-    data_file.close()
-except Exception:
-    pass
+for instance in range(len(listdir('./data'))):
+    try:
+        data_file = open('./data/' + listdir('./data')[instance], 'rb')
+        data.append([listdir('./data')[instance], pickle.load(data_file)])
+        data_file.close()
+    except Exception:
+        continue
 
 # Create a DataFrame to set a value for how much data to show initially.
-data_df = pd.DataFrame(data)
+data_df = pd.DataFrame(data[0][1])
 data_df = data_df.sort_values(by=['week'], ascending=False)
 data_df = data_df.reset_index()
 data_df = data_df.drop('index', axis=1)
@@ -188,8 +225,8 @@ else:
     data_quantity = 12
 
 # Create the inital DataFrame using the data_quantity limit.
-data_df = create_dataframe(data)
-data_df = data_df.head(data_quantity)
+data_df_array = create_dataframe(data)
+data_df = data_df_array[0][1].head(data_quantity)
 
 # Create the frame for getting inputs from the user.
 input_grid = tk.Frame(frame, height=250, width=300)
@@ -233,6 +270,13 @@ ax.set_xticks(old_labels)
 ax.set_xticklabels(labels, rotation=15)
 
 # Create the elements for the input_grid frame.
+instance_chosen = tk.StringVar()
+combobox_label = tk.Label(input_grid, text='Select which instance you want to add/remove:', width=37, anchor='sw')
+combobox_label.grid(row=0, column=0, sticky='w')
+combobox = ttk.Combobox(input_grid, width = 79, state='readonly', textvariable=instance_chosen)
+combobox['values'] = listdir('./data')
+combobox.grid(row=1, column=0)
+
 entries_label = tk.Label(input_grid,
                          text='Enter the start and end dates for the data:',
                          width=37, anchor='sw')
@@ -259,19 +303,19 @@ checkbox_grid = tk.Frame(input_grid, height=50, width=300)
 graph_size_grid = tk.Frame(input_grid, height=50, width=300)
 
 # Add the elements to the input_grid frame.
-entries_label.grid(row=0, column=0, sticky='sw')
+entries_label.grid(row=2, column=0, sticky='sw')
 
-dates_grid.grid(row=1, column=0, sticky='w')
+dates_grid.grid(row=3, column=0, sticky='w')
 
-entries_button.grid(row=1, column=1, rowspan=4)
+entries_button.grid(row=3, column=1, rowspan=4)
 
-checkbox_grid.grid(row=2, column=0, sticky='n')
+checkbox_grid.grid(row=4, column=0, sticky='n')
 
-graph_size_grid.grid(row=3, column=0)
+graph_size_grid.grid(row=5, column=0)
 
-save_label.grid(row=5, column=0, sticky='sw')
-save_text_box.grid(row=6, column=0, sticky='w')
-save_button.grid(row=6, column=1)
+save_label.grid(row=7, column=0, sticky='sw')
+save_text_box.grid(row=8, column=0, sticky='w')
+save_button.grid(row=8, column=1)
 
 # Create the checkboxes that will determine if a metric is shown.
 statuses_checkbox = tk.Checkbutton(checkbox_grid, text='Show statuses',
@@ -333,5 +377,8 @@ root.geometry(f'{starting_width}x{starting_height}')
 
 # Call the resize_canvas function when the window changes size.
 root.bind('<Configure>', resize_canvas)
+
+# Call the instance_changed function when a new instance is selected.
+combobox.bind('<<ComboboxSelected>>', instance_changed)
 
 root.mainloop()
