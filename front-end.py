@@ -127,8 +127,8 @@ def get_inputs(data, frame, save):
         limit2 = temp
     limit2 += (24 * 60 * 60)
     for index in range(len(data_df_array)):
-        data_df_array[index][1] = data_df_array[index][1][data_df['week'].astype(int) >= limit1]
-        data_df_array[index][1] = data_df_array[index][1][data_df['week'].astype(int) < limit2]
+        data_df_array[index][1] = data_df_array[index][1][data_df_array[index][1]['week'].astype(int) >= limit1]
+        data_df_array[index][1] = data_df_array[index][1][data_df_array[index][1]['week'].astype(int) < limit2]
     draw_figure(data_df_array, frame, file_name, save)
 
 
