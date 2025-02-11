@@ -240,15 +240,15 @@ ax.grid()
 ax.plot(data_df['week'].to_numpy(),
         data_df['statuses'].to_numpy().astype(int) /
         data_df['count'].to_numpy().astype(int),
-        label='statuses', marker='x')
+        label=data_df_array[0][0] + ' statuses', marker='x')
 ax.plot(data_df['week'].to_numpy(),
         data_df['logins'].to_numpy().astype(int) /
         data_df['count'].to_numpy().astype(int),
-        label='logins', marker='x')
+        label=data_df_array[0][0] + ' logins', marker='x')
 ax.plot(data_df['week'].to_numpy(),
         data_df['registrations'].to_numpy().astype(int) /
         data_df['count'].to_numpy().astype(int),
-        label='registrations', marker='x')
+        label=data_df_array[0][0] + ' registrations', marker='x')
 
 # Create a graph legend.
 ax.legend(loc='best')
