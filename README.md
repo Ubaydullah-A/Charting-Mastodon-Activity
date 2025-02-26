@@ -6,9 +6,9 @@
 3. Install the required Python packages:
     - Using PIP:
         1. Install PIP by following these instructions: https://packaging.python.org/en/latest/guides/installing-using-linux-tools/
-        2. Install the required packages using: **pip3 install -r requirements.txt**.
+        2. Install the required packages using: `pip3 install -r requirements.txt`.
     - Using APT (Debian and Debian-based Linux distributions):
-        1. Install the required packages using: **sudo apt install python3-matplotlib python3-numpy python3-pandas python3-requests tkcalendar**.
+        1. Install the required packages using: `sudo apt install python3-matplotlib python3-numpy python3-pandas python3-requests tkcalendar`.
 
 ## Running the programs
 
