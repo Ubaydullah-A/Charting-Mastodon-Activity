@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 import tkcalendar
 from tkinter import ttk
-from os import listdir
+from os import listdir, mkdir
 
 matplotlib.use('TkAgg')
 
@@ -83,10 +83,15 @@ def draw_figure(data_df_array, frame, file_name, save):
     ax.set_xticks(old_labels)
     ax.set_xticklabels(labels, rotation=15)
     if save:
+        try:
+            file_check = open('./graphs/' + listdir('./data_files')[0], 'a')
+            file_check.close()
+        except Exception:
+            mkdir('graphs')
         if file_name != '':
-            fig.savefig(file_name + '.png')
+            fig.savefig('./graphs/' + file_name + '.png')
         else:
-            fig.savefig('graph.png')
+            fig.savefig('./graphs/graph.png')
 
 
 # Ask for confirmation before closing the program.
@@ -193,23 +198,23 @@ show_registrations = tk.BooleanVar()
 
 # Check if data has been collected.
 try:
-    file_check = open('./data/' + listdir('./data')[0], 'a')
+    file_check = open('./data_files/' + listdir('./data_files')[0], 'a')
     file_check.close()
 except Exception:
     raise SystemExit('No data has been collected.')
 
 # Create the array that tracks which instances have been selected.
 selected_instances = []
-for x in listdir('./data'):
+for x in listdir('./data_files'):
     selected_instances.append([x, 0])
 selected_instances[0][1] = 1
 
 # Get the collected data.
 data = []
-for instance in range(len(listdir('./data'))):
+for instance in range(len(listdir('./data_files'))):
     try:
-        data_file = open('./data/' + listdir('./data')[instance], 'rb')
-        data.append([listdir('./data')[instance], pickle.load(data_file)])
+        data_file = open('./data_files/' + listdir('./data_files')[instance], 'rb')
+        data.append([listdir('./data_files')[instance], pickle.load(data_file)])
         data_file.close()
     except Exception:
         continue
@@ -274,7 +279,7 @@ instance_chosen = tk.StringVar()
 combobox_label = tk.Label(input_grid, text='Select which instance you want to add/remove:', width=37, anchor='sw')
 combobox_label.grid(row=0, column=0, sticky='w')
 combobox = ttk.Combobox(input_grid, width = 79, state='readonly', textvariable=instance_chosen)
-combobox['values'] = listdir('./data')
+combobox['values'] = listdir('./data_files')
 combobox.grid(row=1, column=0)
 
 entries_label = tk.Label(input_grid,
