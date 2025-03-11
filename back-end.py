@@ -7,20 +7,10 @@ To run this, use: python3 back-end.py
 
 from requests import get, exceptions
 from pickle import load, dump
-from datetime import datetime
-from sys import exit
+from datetime import datetime, timedelta, UTC
 from time import sleep
-
-# Get the previously collected data.
-file_check = open('data', 'a')
-file_check.close()
-data = []
-try:
-    data_file = open('data', 'rb')
-    data = load(data_file)
-    data_file.close()
-except Exception:
-    pass
+from urllib.parse import urlparse
+from os import mkdir, path
 
 # Ask user for instance.
 instance = input('Please enter the URL of the instance you would like to ' +
@@ -36,8 +26,32 @@ except exceptions.RequestException:
                      ' that the instance is **NOT** in whitelist mode, and ' +
                      'that you are connected to the internet.')
 
-unix_timestamp = datetime.timestamp(datetime.now())
+# Get the previously collected data.
+file_name = urlparse(instance)
+if not path.exists('./data_files/'):
+    mkdir('data_files')
+data = []
+try:
+    data_file = open('./data_files/' + file_name.netloc, 'rb')
+    data = load(data_file)
+    data_file.close()
+except Exception:
+    pass
 
+# Calculate when to start collecting new data and wait until that time.
+next_collection = datetime.now().astimezone(UTC)
+today = next_collection.replace(hour=10, minute=0, second=0, microsecond=0)
+if next_collection < today:
+    next_collection = today
+else:
+    tomorrow = next_collection + timedelta(days=1)
+    next_collection = tomorrow.replace(hour=10, minute=0, second=0,
+                                       microsecond=0)
+print('First data collection:', str(next_collection))
+sleep(datetime.timestamp(next_collection) - datetime.timestamp(datetime.now()))
+
+# Collect the new data and store it with the previously collected data.
+attempts = 0
 while True:
     failed_to_collect = False
     # Get new data via the API.
@@ -67,7 +81,7 @@ while True:
                     exists = True
                     break
             if not exists:
-                # Add a 'count' key == 1
+                # Add a 'count' key = 1
                 requested_data[requested_data_entry]['count'] = '1'
                 data.append(requested_data[requested_data_entry])
             else:
@@ -90,14 +104,47 @@ while True:
 
         # Store new data.
         try:
-            write_data = open('data', 'wb')
+            write_data = open('./data_files/' + file_name.netloc, 'wb')
             dump(data, write_data)
             write_data.close()
             print('Successfully collected activity data:', datetime.now())
         except Exception:
             print('Failed to save the collected activity data:',
                   datetime.now())
+            failed_to_collect = True
 
-    # Ensures that the program only requests data once every 24 hours.
-    unix_timestamp += (24 * 60 * 60)
-    sleep(unix_timestamp - datetime.timestamp(datetime.now()))
+    # Reattempt data collection if it was not successfully collected.
+    if failed_to_collect and attempts < 3:
+        attempts += 1
+        print('Attempt', attempts, 'failed.')
+        match attempts:
+            case 1:
+                # Reattempt data collection 1 hour after original attempt.
+                attempt_1 = next_collection.replace(hour=11)
+                print('Retrying data collection in approximately 1 hour.')
+                sleep(datetime.timestamp(attempt_1)
+                      - datetime.timestamp(datetime.now()))
+            case 2:
+                # Reattempt data collection after 6 hours.
+                attempt_2 = next_collection.replace(hour=16)
+                print('Retrying data collection in approximately 5 hours.')
+                sleep(datetime.timestamp(attempt_2)
+                      - datetime.timestamp(datetime.now()))
+            case 3:
+                # Reattempt data collection after 12 hours.
+                attempt_3 = next_collection.replace(hour=22)
+                print('Retrying data collection in approximately 6 hours.')
+                sleep(datetime.timestamp(attempt_3)
+                      - datetime.timestamp(datetime.now()))
+        continue
+    elif failed_to_collect:
+        print('Attempt', attempts, 'failed.')
+        print('No data collected today.')
+
+    # Ensure that the program only requests data once every 24 hours.
+    next_collection = next_collection + timedelta(days=1)
+    print('Next data collection:', str(next_collection))
+    print('')
+    attempts = 0
+    sleep(datetime.timestamp(next_collection)
+          - datetime.timestamp(datetime.now()))
