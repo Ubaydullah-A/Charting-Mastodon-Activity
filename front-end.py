@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 import tkcalendar
 from tkinter import ttk
-from os import listdir, mkdir
+from os import listdir, mkdir, path
 
 matplotlib.use('TkAgg')
 
@@ -90,10 +90,7 @@ def draw_figure(data_df_array, frame, file_name, save):
     ax.set_xticks(old_labels)
     ax.set_xticklabels(labels, rotation=15)
     if save:
-        try:
-            file_check = open('./graphs/' + listdir('./data_files')[0], 'a')
-            file_check.close()
-        except Exception:
+        if not path.exists('./graphs/'):
             mkdir('graphs')
         if file_name != '':
             fig.savefig('./graphs/' + file_name + '.png')
