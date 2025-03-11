@@ -22,3 +22,8 @@ To run this, use: python3 back-end.py
 The front-end takes the activity data collected by the back-end and displays it in a graph.
 
 To run this, use: python3 front-end.py
+
+### Data-conversion
+The data-conversion tool converts data collected before v1.3.0 to the new naming scheme, and stores it in the correct directory. If data has already been collected using v1.3.0, this tool will merge the data files.
+
+To run this, use: python3 data-conversion.py
