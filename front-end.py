@@ -42,22 +42,29 @@ def draw_figure(data_df_array, frame, file_name, save):
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
         for i in range(len(selected_instances)):
-            if selected_instances[i][0] == data_df_array[index][0] and selected_instances[i][1] == 1:
+            if (selected_instances[i][0] == data_df_array[index][0] and
+                    selected_instances[i][1] == 1):
                 if show_statuses.get():
                     ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['statuses'].to_numpy().astype(int) /
-                            data_df_array[index][1]['count'].to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' statuses', marker='x')
+                            data_df_array[index][1]['statuses'].to_numpy()
+                            .astype(int) / data_df_array[index][1]['count']
+                            .to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' statuses',
+                            marker='x')
                 if show_logins.get():
                     ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['logins'].to_numpy().astype(int) /
-                            data_df_array[index][1]['count'].to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' logins', marker='x')
+                            data_df_array[index][1]['logins'].to_numpy()
+                            .astype(int) / data_df_array[index][1]['count']
+                            .to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' logins',
+                            marker='x')
                 if show_registrations.get():
                     ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['registrations'].to_numpy().astype(int) /
-                            data_df_array[index][1]['count'].to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' registrations', marker='x')
+                            data_df_array[index][1]['registrations'].to_numpy()
+                            .astype(int) / data_df_array[index][1]['count']
+                            .to_numpy().astype(int),
+                            label=data_df_array[index][0] + ' registrations',
+                            marker='x')
                 break
 
     # Create a graph legend.
@@ -132,8 +139,12 @@ def get_inputs(data, frame, save):
         limit2 = temp
     limit2 += (24 * 60 * 60)
     for index in range(len(data_df_array)):
-        data_df_array[index][1] = data_df_array[index][1][data_df_array[index][1]['week'].astype(int) >= limit1]
-        data_df_array[index][1] = data_df_array[index][1][data_df_array[index][1]['week'].astype(int) < limit2]
+        data_df_array[index][1] = \
+            data_df_array[index][1][data_df_array[index][1]['week']
+                                    .astype(int) >= limit1]
+        data_df_array[index][1] = \
+            data_df_array[index][1][data_df_array[index][1]['week']
+                                    .astype(int) < limit2]
     draw_figure(data_df_array, frame, file_name, save)
 
 
@@ -148,7 +159,8 @@ def resize_canvas(event):
     canvas.config(width=frame.winfo_width(), height=frame.winfo_height())
 
 
-# Track which instances have been selected by updating the selected_instances array.
+# Track which instances have been selected by updating the selected_instances
+# array.
 def instance_changed(event):
     global selected_instances
     for index in range(len(selected_instances)):
@@ -213,8 +225,10 @@ selected_instances[0][1] = 1
 data = []
 for instance in range(len(listdir('./data_files'))):
     try:
-        data_file = open('./data_files/' + listdir('./data_files')[instance], 'rb')
-        data.append([listdir('./data_files')[instance], pickle.load(data_file)])
+        data_file = open('./data_files/' + listdir('./data_files')[instance],
+                         'rb')
+        data.append([listdir('./data_files')[instance],
+                     pickle.load(data_file)])
         data_file.close()
     except Exception:
         continue
@@ -276,9 +290,12 @@ ax.set_xticklabels(labels, rotation=15)
 
 # Create the elements for the input_grid frame.
 instance_chosen = tk.StringVar()
-combobox_label = tk.Label(input_grid, text='Select which instance you want to add/remove:', width=37, anchor='sw')
+combobox_label = tk.Label(input_grid,
+                          text='Select which instance you want to add/remove:',
+                          width=37, anchor='sw')
 combobox_label.grid(row=0, column=0, sticky='w')
-combobox = ttk.Combobox(input_grid, width = 79, state='readonly', textvariable=instance_chosen)
+combobox = ttk.Combobox(input_grid, width=79, state='readonly',
+                        textvariable=instance_chosen)
 combobox['values'] = listdir('./data_files')
 combobox.grid(row=1, column=0)
 
