@@ -5,39 +5,52 @@ in a graph.
 To run this, use: python3 front-end.py
 '''
 
-import pickle
-import matplotlib
-import matplotlib.pyplot as plt
+import numpy
+from pickle import load
+from matplotlib.pyplot import close, subplots
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-import pandas as pd
-import tkinter as tk
+from pandas import DataFrame
 from sys import exit
 from datetime import datetime
-import time
-import tkcalendar
-from tkinter import ttk
+from time import mktime, strptime
+from tkcalendar import DateEntry
+from tkinter import (Tk, ttk, messagebox, Canvas, Frame, BooleanVar, StringVar,
+                     Label, Button, Checkbutton, Text)
 from os import listdir, mkdir, path
-
-matplotlib.use('TkAgg')
-
+from pathvalidate import is_valid_filename, sanitize_filename
 
 # Plot the graph.
 def draw_figure(data_df_array, frame, file_name, save):
     # Remove the old graph.
     global figure_canvas_agg, selected_instances
     figure_canvas_agg.get_tk_widget().destroy()
-    plt.close('all')
+    close('all')
 
     # Create the new graph.
-    fig, ax = plt.subplots()
+    fig, ax = subplots()
     ax.grid()
     width_value = width_text_box.get('1.0', 'end-1c').strip()
     height_value = height_text_box.get('1.0', 'end-1c').strip()
-    if width_value.isdigit():
+
+    if width_value.isdigit() and height_value.isdigit():
         fig.set_figwidth(int(width_value))
-    if height_value.isdigit():
         fig.set_figheight(int(height_value))
+    elif width_value.isdigit() and height_value  == '':
+        fig.set_figwidth(int(width_value))
+    elif height_value.isdigit() and width_value  == '':
+        fig.set_figheight(int(height_value))
+    elif width_value.isdigit() and height_value  != '':
+        fig.set_figwidth(int(width_value))
+        messagebox.showerror(title='Invalid height', message='The height entered was invalid.\nThe height has been reset.')
+    elif height_value.isdigit() and width_value  != '':
+        fig.set_figheight(int(height_value))
+        messagebox.showerror(title='Invalid width', message='The width entered was invalid.\nThe width has been reset.')
+    elif width_value != '' and height_value  != '':
+        messagebox.showerror(title='Invalid dimensions', message='The width and height values entered were invalid.\nThe dimensions have been reset.')
+    elif width_value != '':
+        messagebox.showerror(title='Invalid width', message='The width entered was invalid.\nThe width has been reset.')
+    elif height_value  != '':
+        messagebox.showerror(title='Invalid height', message='The height entered was invalid.\nThe height has been reset.')
 
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
@@ -93,14 +106,22 @@ def draw_figure(data_df_array, frame, file_name, save):
         if not path.exists('./graphs/'):
             mkdir('graphs')
         if file_name != '':
-            fig.savefig('./graphs/' + file_name + '.png')
+            if (is_valid_filename(file_name)):
+                fig.savefig('./graphs/' + file_name)
+                messagebox.showinfo(title='Graph saved', message='Graph saved as \'' + file_name + '\'.')
+            else:
+                if sanitize_filename(file_name) != '':
+                    messagebox.showerror(title='Invalid file name', message='The graph was not saved.\nDid you mean \'' + sanitize_filename(file_name) + '\'?')
+                else:
+                    messagebox.showerror(title='Invalid file name', message='The graph was not saved.')
         else:
-            fig.savefig('./graphs/graph.png')
+            fig.savefig('./graphs/graph')
+            messagebox.showinfo(title='Graph saved', message='Graph saved as \'graph\'.')
 
 
 # Ask for confirmation before closing the program.
 def on_closing():
-    if tk.messagebox.askokcancel('Quit', 'Do you want to quit?'):
+    if messagebox.askokcancel('Quit', 'Do you want to quit?'):
         exit()
 
 
@@ -113,7 +134,7 @@ def create_dataframe(data):
             for index in range(len(data)):
                 if selected_instances[i][0] == data[index][0]:
                     break
-            data_df = pd.DataFrame(data[index][1])
+            data_df = DataFrame(data[index][1])
             data_df = data_df.sort_values(by=['week'], ascending=False)
             data_df = data_df.reset_index()
             data_df = data_df.drop('index', axis=1)
@@ -128,8 +149,8 @@ def get_inputs(data, frame, save):
     # Create a new DataFrame which only contains the data between midnight of
     # the earlier date and just before the end of the later date.
     data_df_array = create_dataframe(data)
-    limit1 = int(time.mktime(time.strptime(date1.get(), '%d/%m/%Y')))
-    limit2 = int(time.mktime(time.strptime(date2.get(), '%d/%m/%Y')))
+    limit1 = int(mktime(strptime(date1.get(), '%d/%m/%Y')))
+    limit2 = int(mktime(strptime(date2.get(), '%d/%m/%Y')))
     if limit1 > limit2:
         temp = limit1
         limit1 = limit2
@@ -171,18 +192,18 @@ def instance_changed(event):
 
 
 # Create the window.
-root = tk.Tk()
+root = Tk()
 root.title('Charting Mastodon Activity')
 
 # Set the 'x' on the window to call the on_closing function.
 root.protocol('WM_DELETE_WINDOW', on_closing)
 
 # Create the canvas for the window.
-canvas = tk.Canvas(root, highlightthickness=0)
+canvas = Canvas(root, highlightthickness=0)
 canvas.grid(row=0, column=0, sticky='n')
 
 # Create the frame for grouping the other widgets together.
-frame = tk.Frame(canvas)
+frame = Frame(canvas)
 canvas.create_window((0, 0), window=frame)
 
 # Create the scroll bars.
@@ -201,9 +222,9 @@ canvas.configure(yscrollcommand=vertical_scroll_bar.set,
 frame.bind('<Configure>', on_frame_configure)
 
 # Create the required variables for the checkboxes.
-show_statuses = tk.BooleanVar()
-show_logins = tk.BooleanVar()
-show_registrations = tk.BooleanVar()
+show_statuses = BooleanVar()
+show_logins = BooleanVar()
+show_registrations = BooleanVar()
 
 # Check if data has been collected.
 try:
@@ -224,14 +245,13 @@ for instance in range(len(listdir('./data_files'))):
     try:
         data_file = open('./data_files/' + listdir('./data_files')[instance],
                          'rb')
-        data.append([listdir('./data_files')[instance],
-                     pickle.load(data_file)])
+        data.append([listdir('./data_files')[instance], load(data_file)])
         data_file.close()
     except Exception:
         continue
 
 # Create a DataFrame to set a value for how much data to show initially.
-data_df = pd.DataFrame(data[0][1])
+data_df = DataFrame(data[0][1])
 data_df = data_df.sort_values(by=['week'], ascending=False)
 data_df = data_df.reset_index()
 data_df = data_df.drop('index', axis=1)
@@ -245,11 +265,11 @@ data_df_array = create_dataframe(data)
 data_df = data_df_array[0][1].head(data_quantity)
 
 # Create the frame for getting inputs from the user.
-input_grid = tk.Frame(frame, height=250, width=300)
+input_grid = Frame(frame, height=250, width=300)
 input_grid.grid(row=0, column=0)
 
 # Create the initial graph.
-fig, ax = plt.subplots()
+fig, ax = subplots()
 ax.grid()
 
 # Plot the data on the graph.
@@ -286,40 +306,40 @@ ax.set_xticks(old_labels)
 ax.set_xticklabels(labels, rotation=15)
 
 # Create the elements for the input_grid frame.
-instance_chosen = tk.StringVar()
-combobox_label = tk.Label(input_grid,
-                          text='Select which instance you want to add/remove:',
-                          width=37, anchor='sw')
+instance_chosen = StringVar()
+combobox_label = Label(input_grid,
+                       text='Select which instance you want to add/remove:',
+                       anchor='sw')
 combobox_label.grid(row=0, column=0, sticky='w')
-combobox = ttk.Combobox(input_grid, width=79, state='readonly',
+combobox = ttk.Combobox(input_grid, width = 87, state='readonly',
                         textvariable=instance_chosen)
 combobox['values'] = listdir('./data_files')
 combobox.grid(row=1, column=0)
 
-entries_label = tk.Label(input_grid,
+entries_label = Label(input_grid,
                          text='Enter the start and end dates for the data:',
                          width=37, anchor='sw')
 
-entries_button = tk.Button(input_grid, height=6, width=20, text='Enter',
+entries_button = Button(input_grid, height=6, width=20, text='Enter',
                            command=lambda:
                            get_inputs(data, frame, False))
 
-save_label = tk.Label(input_grid,
+save_label = Label(input_grid,
                       text='\nEnter the file name you want the graph to be ' +
                            'saved as:', anchor='sw')
-save_text_box = tk.Text(input_grid, height=1, pady=5)
-save_button = tk.Button(input_grid, height=1, width=20, text='Save graph',
+save_text_box = Text(input_grid, height=1, width = 79, pady=5, padx=3)
+save_button = Button(input_grid, height=1, width=20, text='Save graph',
                         command=lambda:
                         get_inputs(data, frame, True))
 
 # Create the frame for the start and end date selection.
-dates_grid = tk.Frame(input_grid, height=50, width=300)
+dates_grid = Frame(input_grid, height=50, width=300)
 
 # Create the frame for the checkboxes.
-checkbox_grid = tk.Frame(input_grid, height=50, width=300)
+checkbox_grid = Frame(input_grid, height=50, width=300)
 
 # Create the frames for the width and height inputs.
-graph_size_grid = tk.Frame(input_grid, height=50, width=300)
+graph_size_grid = Frame(input_grid, height=50, width=300)
 
 # Add the elements to the input_grid frame.
 entries_label.grid(row=2, column=0, sticky='sw')
@@ -330,22 +350,22 @@ entries_button.grid(row=3, column=1, rowspan=4)
 
 checkbox_grid.grid(row=4, column=0, sticky='n')
 
-graph_size_grid.grid(row=5, column=0)
+graph_size_grid.grid(row=5, column=0, sticky='w')
 
 save_label.grid(row=7, column=0, sticky='sw')
 save_text_box.grid(row=8, column=0, sticky='w')
 save_button.grid(row=8, column=1)
 
 # Create the checkboxes that will determine if a metric is shown.
-statuses_checkbox = tk.Checkbutton(checkbox_grid, text='Show statuses',
+statuses_checkbox = Checkbutton(checkbox_grid, text='Show statuses',
                                    variable=show_statuses, onvalue=True,
                                    offvalue=False)
 statuses_checkbox.select()
-logins_checkbox = tk.Checkbutton(checkbox_grid, text='Show logins',
+logins_checkbox = Checkbutton(checkbox_grid, text='Show logins',
                                  variable=show_logins, onvalue=True,
                                  offvalue=False)
 logins_checkbox.select()
-registrations_checkbox = tk.Checkbutton(checkbox_grid,
+registrations_checkbox = Checkbutton(checkbox_grid,
                                         text='Show registrations',
                                         variable=show_registrations,
                                         onvalue=True, offvalue=False)
@@ -357,12 +377,12 @@ logins_checkbox.grid(row=0, column=1)
 registrations_checkbox.grid(row=0, column=2)
 
 # Create the elements for the graph_size_grid frame.
-width_label = tk.Label(graph_size_grid, text='Enter the width of the graph ' +
+width_label = Label(graph_size_grid, text='Enter the width of the graph ' +
                        'in inches (optional):')
-width_text_box = tk.Text(graph_size_grid, height=1, width=39, pady=5)
-height_label = tk.Label(graph_size_grid, text='Enter the height of the graph' +
+width_text_box = Text(graph_size_grid, height=1, width=39, pady=5, padx=3)
+height_label = Label(graph_size_grid, text='Enter the height of the graph' +
                         ' in inches (optional):')
-height_text_box = tk.Text(graph_size_grid, height=1, width=40, pady=5)
+height_text_box = Text(graph_size_grid, height=1, width=39, pady=5, padx=3)
 
 # Add the checkboxes to the graph_size_grid frame.
 width_label.grid(row=0, column=0)
@@ -372,13 +392,13 @@ height_text_box.grid(row=1, column=1)
 
 # Create the calendars for the dates_grid frame.
 start_date = datetime.fromtimestamp(float(old_labels[0])).strftime('%d/%m/%Y')
-date1 = tkcalendar.DateEntry(dates_grid, width=38)
+date1 = DateEntry(dates_grid, width=42)
 date1.set_date(start_date)
 
 end_date = datetime.fromtimestamp(float(
                                   old_labels[len(
                                     old_labels)-1])).strftime('%d/%m/%Y')
-date2 = tkcalendar.DateEntry(dates_grid, width=39)
+date2 = DateEntry(dates_grid, width=43)
 date2.set_date(end_date)
 
 # Add the calendars to the dates_grid frame.
