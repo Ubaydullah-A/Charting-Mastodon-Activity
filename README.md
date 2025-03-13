@@ -9,7 +9,7 @@
         - Install the required packages using: `pip3 install -r requirements.txt`.
 
     - Using APT (Debian and Debian-based Linux distributions):
-        - Install the required packages using: `sudo apt install python3-matplotlib python3-numpy python3-pandas python3-requests tkcalendar`.
+        - Install the required packages using: `sudo apt install python3-matplotlib python3-numpy python3-pandas python3-requests tkcalendar python3-pathvalidate`.
 
 ## Running the programs
 
