@@ -15,9 +15,10 @@ from datetime import datetime
 from time import mktime, strptime
 from tkcalendar import DateEntry
 from tkinter import (Tk, ttk, messagebox, Canvas, Frame, BooleanVar, StringVar,
-                     Label, Button, Checkbutton, Text)
+                     Label, Button, Checkbutton, Text, font, Scale)
 from os import listdir, mkdir, path
 from pathvalidate import is_valid_filename, sanitize_filename
+
 
 # Plot the graph.
 def draw_figure(data_df_array, frame, file_name, save):
@@ -35,22 +36,30 @@ def draw_figure(data_df_array, frame, file_name, save):
     if width_value.isdigit() and height_value.isdigit():
         fig.set_figwidth(int(width_value))
         fig.set_figheight(int(height_value))
-    elif width_value.isdigit() and height_value  == '':
+    elif width_value.isdigit() and height_value == '':
         fig.set_figwidth(int(width_value))
-    elif height_value.isdigit() and width_value  == '':
+    elif height_value.isdigit() and width_value == '':
         fig.set_figheight(int(height_value))
-    elif width_value.isdigit() and height_value  != '':
+    elif width_value.isdigit() and height_value != '':
         fig.set_figwidth(int(width_value))
-        messagebox.showerror(title='Invalid height', message='The height entered was invalid.\nThe height has been reset.')
-    elif height_value.isdigit() and width_value  != '':
+        messagebox.showerror(title='Invalid height', message='The height '
+                             + 'entered was invalid.\nThe height has been '
+                             + 'reset.')
+    elif height_value.isdigit() and width_value != '':
         fig.set_figheight(int(height_value))
-        messagebox.showerror(title='Invalid width', message='The width entered was invalid.\nThe width has been reset.')
-    elif width_value != '' and height_value  != '':
-        messagebox.showerror(title='Invalid dimensions', message='The width and height values entered were invalid.\nThe dimensions have been reset.')
+        messagebox.showerror(title='Invalid width', message='The width entered'
+                             + ' was invalid.\nThe width has been reset.')
+    elif width_value != '' and height_value != '':
+        messagebox.showerror(title='Invalid dimensions', message='The width '
+                             + 'and height values entered were invalid.\nThe '
+                             + 'dimensions have been reset.')
     elif width_value != '':
-        messagebox.showerror(title='Invalid width', message='The width entered was invalid.\nThe width has been reset.')
-    elif height_value  != '':
-        messagebox.showerror(title='Invalid height', message='The height entered was invalid.\nThe height has been reset.')
+        messagebox.showerror(title='Invalid width', message='The width entered'
+                             + ' was invalid.\nThe width has been reset.')
+    elif height_value != '':
+        messagebox.showerror(title='Invalid height', message='The height '
+                             + 'entered was invalid.\nThe height has been '
+                             + 'reset.')
 
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
@@ -90,7 +99,7 @@ def draw_figure(data_df_array, frame, file_name, save):
     # Draw the graph in order to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=2, column=0)
+    figure_canvas_agg.get_tk_widget().grid(row=2, column=2)
 
     # Replace the x-axis labels with dates rather than Unix timestamps.
     old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -108,15 +117,22 @@ def draw_figure(data_df_array, frame, file_name, save):
         if file_name != '':
             if (is_valid_filename(file_name)):
                 fig.savefig('./graphs/' + file_name)
-                messagebox.showinfo(title='Graph saved', message='Graph saved as \'' + file_name + '\'.')
+                messagebox.showinfo(title='Graph saved', message='Graph saved '
+                                    + 'as \'' + file_name + '\'.')
             else:
                 if sanitize_filename(file_name) != '':
-                    messagebox.showerror(title='Invalid file name', message='The graph was not saved.\nDid you mean \'' + sanitize_filename(file_name) + '\'?')
+                    messagebox.showerror(title='Invalid file name',
+                                         message='The graph was not saved.\n'
+                                         + 'Did you mean \''
+                                         + sanitize_filename(file_name)
+                                         + '\'?')
                 else:
-                    messagebox.showerror(title='Invalid file name', message='The graph was not saved.')
+                    messagebox.showerror(title='Invalid file name',
+                                         message='The graph was not saved.')
         else:
             fig.savefig('./graphs/graph')
-            messagebox.showinfo(title='Graph saved', message='Graph saved as \'graph\'.')
+            messagebox.showinfo(title='Graph saved', message='Graph saved as '
+                                + '\'graph\'.')
 
 
 # Ask for confirmation before closing the program.
@@ -189,6 +205,30 @@ def instance_changed(event):
                 selected_instances[index][1] = 0
             break
     get_inputs(data, frame, False)
+
+
+# Change the font when a new font is selected.
+def font_changed(event):
+    app_font.configure(family=font_chosen.get())
+    app_title_font.configure(family=font_chosen.get())
+
+
+# Change the font size when a new font size is selected, and adjust the widths
+# accordingly.
+def font_size_changed(event):
+    app_font.configure(size=font_size_scale.get())
+    app_title_font.configure(size=font_size_scale.get() + 5)
+    app_textbox_font.configure(size=font_size_scale.get())
+    app_width_1 = int(round((1/font_size_scale.get()) * 420))
+    app_width_2 = int(round((1/font_size_scale.get()) * 430))
+    app_width_3 = int(round((1/font_size_scale.get()) * 880))
+    app_width_4 = int(round((1/font_size_scale.get()) * 300))
+    date1.configure(width=app_width_1)
+    date2.configure(width=app_width_2)
+    width_text_box.configure(width=app_width_2)
+    height_text_box.configure(width=app_width_2)
+    save_text_box.configure(width=app_width_3)
+    font_combobox.configure(width=app_width_4)
 
 
 # Create the window.
@@ -264,9 +304,62 @@ else:
 data_df_array = create_dataframe(data)
 data_df = data_df_array[0][1].head(data_quantity)
 
+# Create the frame for getting inputs from the user to configure the window.
+configuration_grid = Frame(frame, height=250, width=300)
+configuration_grid.grid(row=0, column=0, rowspan=2, sticky='ns')
+
+# Collect all available fonts in an array.
+font_options = []
+for x in font.families():
+    font_options.append(x)
+font_options.sort()
+
+# Set a default font.
+font_style = StringVar(value="TkDefaultFont")
+
+# Create the fonts.
+app_font = font.Font(family=font_style.get(), size=10,
+                     weight='normal')
+app_title_font = font.Font(family=font_style.get(), size=15, weight='bold',
+                           underline=1)
+app_textbox_font = font.Font(size=10)
+
+# Create the elements for the configuration_grid frame.
+window_configuration_label = Label(configuration_grid,
+                                   text='Window Configuration',
+                                   anchor='w', wraplength=290,
+                                   font=app_title_font)
+window_configuration_label.grid(row=0, column=0, sticky='n')
+
+change_font_label = Label(configuration_grid,
+                          text='Change font:', anchor='w', wraplength=290,
+                          font=app_font)
+change_font_label.grid(row=1, column=0, sticky='w')
+
+font_chosen = StringVar()
+font_combobox = ttk.Combobox(configuration_grid, width=30, state='readonly',
+                             textvariable=font_chosen, font=app_textbox_font)
+font_combobox['values'] = font_options
+font_combobox.grid(row=2, column=0)
+
+change_font_size_label = Label(configuration_grid,
+                               text='Change font size:', anchor='w',
+                               wraplength=290, font=app_font)
+change_font_size_label.grid(row=3, column=0, sticky='w')
+
+font_size_scale = Scale(configuration_grid, from_=1, to=100,
+                        orient='horizontal', font=app_textbox_font)
+font_size_scale.set(10)
+font_size_scale.grid(row=4, column=0, sticky='ew')
+
+# Create a separator between the configuration_grid frame and the input_grid
+# frame.
+separator = ttk.Separator(frame, orient='vertical')
+separator.grid(row=0, column=1, rowspan=4, sticky='ns')
+
 # Create the frame for getting inputs from the user.
 input_grid = Frame(frame, height=250, width=300)
-input_grid.grid(row=0, column=0)
+input_grid.grid(row=0, column=2)
 
 # Create the initial graph.
 fig, ax = subplots()
@@ -292,7 +385,7 @@ ax.legend(loc='best')
 # Draw the graph in order to get the x-axis labels.
 figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
 figure_canvas_agg.draw()
-figure_canvas_agg.get_tk_widget().grid(row=2, column=0)
+figure_canvas_agg.get_tk_widget().grid(row=2, column=2)
 
 # Replace the x-axis labels with dates rather than Unix timestamps.
 old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -305,32 +398,38 @@ for x in range(0, len(old_labels)):
 ax.set_xticks(old_labels)
 ax.set_xticklabels(labels, rotation=15)
 
+graph_configuration_label = Label(input_grid, text='Graph Configuration',
+                                  anchor='w', wraplength=800,
+                                  font=app_title_font)
+graph_configuration_label.grid(row=0, column=0, sticky='w')
+
 # Create the elements for the input_grid frame.
 instance_chosen = StringVar()
 combobox_label = Label(input_grid,
                        text='Select which instance you want to add/remove:',
-                       anchor='sw')
-combobox_label.grid(row=0, column=0, sticky='w')
-combobox = ttk.Combobox(input_grid, width = 87, state='readonly',
-                        textvariable=instance_chosen)
+                       anchor='sw', wraplength=800, font=app_font)
+combobox_label.grid(row=1, column=0, sticky='w')
+combobox = ttk.Combobox(input_grid, state='readonly',
+                        textvariable=instance_chosen, font=app_textbox_font)
 combobox['values'] = listdir('./data_files')
-combobox.grid(row=1, column=0)
+combobox.grid(row=2, column=0, columnspan=2, sticky='ew')
 
 entries_label = Label(input_grid,
-                         text='Enter the start and end dates for the data:',
-                         width=37, anchor='sw')
+                      text='Enter the start and end dates for the data:',
+                      anchor='sw', wraplength=800, font=app_font)
 
 entries_button = Button(input_grid, height=6, width=20, text='Enter',
-                           command=lambda:
-                           get_inputs(data, frame, False))
+                        command=lambda: get_inputs(data, frame, False),
+                        font=app_font)
 
 save_label = Label(input_grid,
-                      text='\nEnter the file name you want the graph to be ' +
-                           'saved as:', anchor='sw')
-save_text_box = Text(input_grid, height=1, width = 79, pady=5, padx=3)
+                   text='\nEnter the file name you want the graph to be saved '
+                   + 'as:', anchor='sw', wraplength=800, font=app_font)
+save_text_box = Text(input_grid, height=1, width=88, pady=5, padx=2,
+                     font=app_textbox_font)
 save_button = Button(input_grid, height=1, width=20, text='Save graph',
-                        command=lambda:
-                        get_inputs(data, frame, True))
+                     font=app_font, command=lambda: get_inputs(data, frame,
+                                                               True))
 
 # Create the frame for the start and end date selection.
 dates_grid = Frame(input_grid, height=50, width=300)
@@ -342,33 +441,33 @@ checkbox_grid = Frame(input_grid, height=50, width=300)
 graph_size_grid = Frame(input_grid, height=50, width=300)
 
 # Add the elements to the input_grid frame.
-entries_label.grid(row=2, column=0, sticky='sw')
+entries_label.grid(row=3, column=0, sticky='sw')
 
-dates_grid.grid(row=3, column=0, sticky='w')
+dates_grid.grid(row=4, column=0, sticky='w')
 
-entries_button.grid(row=3, column=1, rowspan=4)
-
-checkbox_grid.grid(row=4, column=0, sticky='n')
+entries_button.grid(row=4, column=1, rowspan=4, sticky='ns')
 
 graph_size_grid.grid(row=5, column=0, sticky='w')
 
-save_label.grid(row=7, column=0, sticky='sw')
-save_text_box.grid(row=8, column=0, sticky='w')
-save_button.grid(row=8, column=1)
+checkbox_grid.grid(row=7, column=0, sticky='nw')
+
+save_label.grid(row=8, column=0, sticky='sw')
+save_text_box.grid(row=9, column=0, sticky='w')
+save_button.grid(row=9, column=1)
 
 # Create the checkboxes that will determine if a metric is shown.
 statuses_checkbox = Checkbutton(checkbox_grid, text='Show statuses',
-                                   variable=show_statuses, onvalue=True,
-                                   offvalue=False)
+                                variable=show_statuses, onvalue=True,
+                                offvalue=False, wraplength=240, font=app_font)
 statuses_checkbox.select()
 logins_checkbox = Checkbutton(checkbox_grid, text='Show logins',
-                                 variable=show_logins, onvalue=True,
-                                 offvalue=False)
+                              variable=show_logins, onvalue=True,
+                              offvalue=False, wraplength=240, font=app_font)
 logins_checkbox.select()
-registrations_checkbox = Checkbutton(checkbox_grid,
-                                        text='Show registrations',
-                                        variable=show_registrations,
-                                        onvalue=True, offvalue=False)
+registrations_checkbox = Checkbutton(checkbox_grid, text='Show registrations',
+                                     variable=show_registrations, onvalue=True,
+                                     offvalue=False, wraplength=240,
+                                     font=app_font)
 registrations_checkbox.select()
 
 # Add the checkboxes to the checkbox_grid frame.
@@ -378,11 +477,13 @@ registrations_checkbox.grid(row=0, column=2)
 
 # Create the elements for the graph_size_grid frame.
 width_label = Label(graph_size_grid, text='Enter the width of the graph ' +
-                       'in inches (optional):')
-width_text_box = Text(graph_size_grid, height=1, width=39, pady=5, padx=3)
+                    'in inches (optional): ', wraplength=400, font=app_font)
+width_text_box = Text(graph_size_grid, height=1, width=43, pady=5, padx=4,
+                      font=app_textbox_font)
 height_label = Label(graph_size_grid, text='Enter the height of the graph' +
-                        ' in inches (optional):')
-height_text_box = Text(graph_size_grid, height=1, width=39, pady=5, padx=3)
+                     ' in inches (optional): ', wraplength=400, font=app_font)
+height_text_box = Text(graph_size_grid, height=1, width=43, pady=5, padx=5,
+                       font=app_textbox_font)
 
 # Add the checkboxes to the graph_size_grid frame.
 width_label.grid(row=0, column=0)
@@ -392,13 +493,13 @@ height_text_box.grid(row=1, column=1)
 
 # Create the calendars for the dates_grid frame.
 start_date = datetime.fromtimestamp(float(old_labels[0])).strftime('%d/%m/%Y')
-date1 = DateEntry(dates_grid, width=42)
+date1 = DateEntry(dates_grid, width=42, font=app_textbox_font)
 date1.set_date(start_date)
 
 end_date = datetime.fromtimestamp(float(
                                   old_labels[len(
                                     old_labels)-1])).strftime('%d/%m/%Y')
-date2 = DateEntry(dates_grid, width=43)
+date2 = DateEntry(dates_grid, width=43, font=app_textbox_font)
 date2.set_date(end_date)
 
 # Add the calendars to the dates_grid frame.
@@ -419,5 +520,11 @@ root.bind('<Configure>', resize_canvas)
 
 # Call the instance_changed function when a new instance is selected.
 combobox.bind('<<ComboboxSelected>>', instance_changed)
+
+# Call the font_changed function when a new font is selected.
+font_combobox.bind('<<ComboboxSelected>>', font_changed)
+
+# Call the font_size_changed function when a new font size is selected.
+font_size_scale.bind("<ButtonRelease-1>", font_size_changed)
 
 root.mainloop()
