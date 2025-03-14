@@ -15,7 +15,8 @@ from datetime import datetime
 from time import mktime, strptime
 from tkcalendar import DateEntry
 from tkinter import (Tk, ttk, messagebox, Canvas, Frame, BooleanVar, StringVar,
-                     Label, Button, Checkbutton, Text, font, Scale)
+                     Label, Button, Checkbutton, Text, font, Scale,
+                     colorchooser)
 from os import listdir, mkdir, path
 from pathvalidate import is_valid_filename, sanitize_filename
 
@@ -99,7 +100,7 @@ def draw_figure(data_df_array, frame, file_name, save):
     # Draw the graph in order to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
     figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=2, column=2)
+    figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
 
     # Replace the x-axis labels with dates rather than Unix timestamps.
     old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -190,7 +191,8 @@ def on_frame_configure(event):
 
 # Resize the canvas to the correct size when the window changes size.
 def resize_canvas(event):
-    canvas.config(width=frame.winfo_width(), height=frame.winfo_height())
+    canvas.configure(width=frame.winfo_width(), height=frame.winfo_height())
+    separator.configure(height=root.winfo_height()-16)
 
 
 # Track which instances have been selected by updating the selected_instances
@@ -229,10 +231,137 @@ def font_size_changed(event):
     height_text_box.configure(width=app_width_2)
     save_text_box.configure(width=app_width_3)
     font_combobox.configure(width=app_width_4)
+    bg_colour_button.configure(width=app_width_4)
+
+
+# Explicitly change the background colour of every relevant element.
+def choose_bg_colour():
+    chosen_bg_colour = colorchooser.askcolor(title='Choose colour.')
+    root.configure(bg=chosen_bg_colour[1])
+    canvas.configure(bg=chosen_bg_colour[1])
+    frame.configure(bg=chosen_bg_colour[1])
+    input_grid.configure(bg=chosen_bg_colour[1])
+    configuration_grid.configure(bg=chosen_bg_colour[1])
+    dates_grid.configure(bg=chosen_bg_colour[1])
+    window_configuration_label.configure(bg=chosen_bg_colour[1])
+    change_font_label.configure(bg=chosen_bg_colour[1])
+    change_font_size_label.configure(bg=chosen_bg_colour[1])
+    font_size_scale.configure(bg=chosen_bg_colour[1],
+                              highlightbackground=chosen_bg_colour[1])
+    graph_configuration_label.configure(bg=chosen_bg_colour[1])
+    combobox_label.configure(bg=chosen_bg_colour[1])
+    entries_label.configure(bg=chosen_bg_colour[1])
+    save_label.configure(bg=chosen_bg_colour[1])
+    statuses_checkbox.configure(bg=chosen_bg_colour[1],
+                                highlightbackground=chosen_bg_colour[1])
+    logins_checkbox.configure(bg=chosen_bg_colour[1],
+                              highlightbackground=chosen_bg_colour[1])
+    registrations_checkbox.configure(bg=chosen_bg_colour[1],
+                                     highlightbackground=chosen_bg_colour[1])
+    graph_size_grid.configure(bg=chosen_bg_colour[1])
+    width_label.configure(bg=chosen_bg_colour[1])
+    height_label.configure(bg=chosen_bg_colour[1])
+    empty_row_1.configure(bg=chosen_bg_colour[1])
+    empty_row_2.configure(bg=chosen_bg_colour[1])
+    empty_row_3.configure(bg=chosen_bg_colour[1])
+    empty_row_4.configure(bg=chosen_bg_colour[1])
+    empty_row_5.configure(bg=chosen_bg_colour[1])
+    empty_row_6.configure(bg=chosen_bg_colour[1])
+    empty_row_7.configure(bg=chosen_bg_colour[1])
+    empty_row_8.configure(bg=chosen_bg_colour[1])
+    empty_column_1.configure(bg=chosen_bg_colour[1])
+    empty_column_2.configure(bg=chosen_bg_colour[1])
+    empty_column_3.configure(bg=chosen_bg_colour[1])
+    empty_column_4.configure(bg=chosen_bg_colour[1])
+    style.configure('Vertical.TScrollbar', troughcolor=chosen_bg_colour[1],
+                    arrowcolor=chosen_bg_colour[1])
+    style.configure('Horizontal.TScrollbar', troughcolor=chosen_bg_colour[1],
+                    arrowcolor=chosen_bg_colour[1])
+    style.configure('TSeparator', background=chosen_bg_colour[1])
+    style.configure('TCombobox', arrowcolor=chosen_bg_colour[1])
+    width_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    height_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    save_text_box.configure(highlightbackground=chosen_bg_colour[1])
+
+
+# Explicitly change the colour of every relevant input element.
+def choose_input_colour():
+    chosen_input_colour = colorchooser.askcolor(title='Choose colour.')
+    style.configure('TCombobox', background=chosen_input_colour[1])
+    font_size_scale.configure(troughcolor=chosen_input_colour[1])
+    style.configure('DateEntry', fieldbackground=chosen_input_colour[1],
+                    background=chosen_input_colour[1])
+    width_text_box.configure(bg=chosen_input_colour[1])
+    height_text_box.configure(bg=chosen_input_colour[1])
+    save_text_box.configure(bg=chosen_input_colour[1])
+
+
+# Explicitly change the colour of every relevant text element.
+def choose_text_colour():
+    chosen_text_colour = colorchooser.askcolor(title='Choose colour.')
+    window_configuration_label.configure(fg=chosen_text_colour[1])
+    change_font_label.configure(fg=chosen_text_colour[1])
+    change_font_size_label.configure(fg=chosen_text_colour[1])
+    font_size_scale.configure(fg=chosen_text_colour[1])
+    text_colour_button.configure(fg=chosen_text_colour[1])
+    bg_colour_button.configure(fg=chosen_text_colour[1])
+    input_colour_button.configure(fg=chosen_text_colour[1])
+    button_colour_button.configure(fg=chosen_text_colour[1])
+    highlight_colour_button.configure(fg=chosen_text_colour[1])
+    graph_configuration_label.configure(fg=chosen_text_colour[1])
+    combobox_label.configure(fg=chosen_text_colour[1])
+    entries_label.configure(fg=chosen_text_colour[1])
+    entries_button.configure(fg=chosen_text_colour[1])
+    save_label.configure(fg=chosen_text_colour[1])
+    save_text_box.configure(fg=chosen_text_colour[1])
+    save_button.configure(fg=chosen_text_colour[1])
+    statuses_checkbox.configure(fg=chosen_text_colour[1])
+    logins_checkbox.configure(fg=chosen_text_colour[1])
+    registrations_checkbox.configure(fg=chosen_text_colour[1])
+    width_label.configure(fg=chosen_text_colour[1])
+    width_text_box.configure(fg=chosen_text_colour[1])
+    height_label.configure(fg=chosen_text_colour[1])
+    height_text_box.configure(fg=chosen_text_colour[1])
+    style.configure('DateEntry', foreground=chosen_text_colour[1])
+
+
+# Explicitly change the colour of every relevant button element.
+def choose_button_colour():
+    chosen_button_colour = colorchooser.askcolor(title='Choose colour.')
+    text_colour_button.configure(bg=chosen_button_colour[1])
+    bg_colour_button.configure(bg=chosen_button_colour[1])
+    input_colour_button.configure(bg=chosen_button_colour[1])
+    button_colour_button.configure(bg=chosen_button_colour[1])
+    highlight_colour_button.configure(bg=chosen_button_colour[1])
+    entries_button.configure(bg=chosen_button_colour[1])
+    save_button.configure(bg=chosen_button_colour[1])
+
+
+# Explicitly change the highlight colour of every relevant element.
+def choose_highlight_colour():
+    chosen_highlight_colour = colorchooser.askcolor(title='Choose colour.')
+    text_colour_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
+    bg_colour_button.configure(highlightbackground=chosen_highlight_colour[1])
+    input_colour_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
+    button_colour_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
+    highlight_colour_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
+    entries_button.configure(highlightbackground=chosen_highlight_colour[1])
+    save_button.configure(highlightbackground=chosen_highlight_colour[1])
+    separator.configure(bg=chosen_highlight_colour[1])
+    style.configure('Vertical.TScrollbar',
+                    background=chosen_highlight_colour[1])
+    style.configure('Horizontal.TScrollbar',
+                    background=chosen_highlight_colour[1])
 
 
 # Create the window.
 root = Tk()
+style = ttk.Style()
+style.theme_use('default')
 root.title('Charting Mastodon Activity')
 
 # Set the 'x' on the window to call the on_closing function.
@@ -306,7 +435,7 @@ data_df = data_df_array[0][1].head(data_quantity)
 
 # Create the frame for getting inputs from the user to configure the window.
 configuration_grid = Frame(frame, height=250, width=300)
-configuration_grid.grid(row=0, column=0, rowspan=2, sticky='ns')
+configuration_grid.grid(row=1, column=1, rowspan=5, sticky='ns')
 
 # Collect all available fonts in an array.
 font_options = []
@@ -315,7 +444,7 @@ for x in font.families():
 font_options.sort()
 
 # Set a default font.
-font_style = StringVar(value="TkDefaultFont")
+font_style = StringVar(value='TkDefaultFont')
 
 # Create the fonts.
 app_font = font.Font(family=font_style.get(), size=10,
@@ -329,10 +458,10 @@ window_configuration_label = Label(configuration_grid,
                                    text='Window Configuration',
                                    anchor='w', wraplength=290,
                                    font=app_title_font)
-window_configuration_label.grid(row=0, column=0, sticky='n')
+window_configuration_label.grid(row=0, column=0, sticky='w')
 
 change_font_label = Label(configuration_grid,
-                          text='Change font:', anchor='w', wraplength=290,
+                          text='Select font:', anchor='w', wraplength=290,
                           font=app_font)
 change_font_label.grid(row=1, column=0, sticky='w')
 
@@ -343,7 +472,7 @@ font_combobox['values'] = font_options
 font_combobox.grid(row=2, column=0)
 
 change_font_size_label = Label(configuration_grid,
-                               text='Change font size:', anchor='w',
+                               text='Select font size:', anchor='w',
                                wraplength=290, font=app_font)
 change_font_size_label.grid(row=3, column=0, sticky='w')
 
@@ -352,14 +481,76 @@ font_size_scale = Scale(configuration_grid, from_=1, to=100,
 font_size_scale.set(10)
 font_size_scale.grid(row=4, column=0, sticky='ew')
 
+empty_row_1 = Label(configuration_grid, text='')
+empty_row_1.grid(row=5, column=0)
+
+text_colour_button = Button(configuration_grid, text='Select text colour',
+                            command=choose_text_colour, wraplength=300,
+                            font=app_font)
+text_colour_button.grid(row=6, column=0, sticky='ew')
+
+empty_row_2 = Label(configuration_grid, text='')
+empty_row_2.grid(row=7, column=0)
+
+bg_colour_button = Button(configuration_grid, text='Select background colour',
+                          command=choose_bg_colour, wraplength=300,
+                          font=app_font)
+bg_colour_button.grid(row=8, column=0, sticky='ew')
+
+empty_row_3 = Label(configuration_grid, text='')
+empty_row_3.grid(row=9, column=0)
+
+input_colour_button = Button(configuration_grid, text='Select input colour',
+                             command=choose_input_colour, wraplength=300,
+                             font=app_font)
+input_colour_button.grid(row=10, column=0, sticky='ew')
+
+empty_row_4 = Label(configuration_grid, text='')
+empty_row_4.grid(row=11, column=0)
+
+button_colour_button = Button(configuration_grid, text='Select button colour',
+                              command=choose_button_colour,
+                              wraplength=300, font=app_font)
+button_colour_button.grid(row=12, column=0, sticky='ew')
+
+empty_row_5 = Label(configuration_grid, text='')
+empty_row_5.grid(row=13, column=0)
+
+highlight_colour_button = Button(configuration_grid, text='Select highlight '
+                                 + 'colour', command=choose_highlight_colour,
+                                 wraplength=300, font=app_font)
+highlight_colour_button.grid(row=14, column=0, sticky='ew')
+
+# Add padding around the frames and the separator.
+empty_column_1 = Label(frame, text='', width=2)
+empty_column_1.grid(row=1, column=0)
+
+empty_column_2 = Label(frame, text='', width=2)
+empty_column_2.grid(row=1, column=2)
+
+empty_column_3 = Label(frame, text='', width=2)
+empty_column_3.grid(row=1, column=4)
+
+empty_column_4 = Label(frame, text='', width=2)
+empty_column_4.grid(row=1, column=6)
+
+empty_row_6 = Label(frame, text='')
+empty_row_6.grid(row=0, column=0, columnspan=6)
+
+empty_row_7 = Label(frame, text='')
+empty_row_7.grid(row=3, column=5)
+
+empty_row_8 = Label(frame, text='')
+empty_row_8.grid(row=5, column=5)
+
 # Create a separator between the configuration_grid frame and the input_grid
 # frame.
-separator = ttk.Separator(frame, orient='vertical')
-separator.grid(row=0, column=1, rowspan=4, sticky='ns')
+separator = Frame(frame, width=1, bg='grey', relief='groove')
+separator.grid(row=0, column=3, rowspan=6, sticky='ns')
 
 # Create the frame for getting inputs from the user.
 input_grid = Frame(frame, height=250, width=300)
-input_grid.grid(row=0, column=2)
+input_grid.grid(row=1, column=5)
 
 # Create the initial graph.
 fig, ax = subplots()
@@ -385,7 +576,7 @@ ax.legend(loc='best')
 # Draw the graph in order to get the x-axis labels.
 figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
 figure_canvas_agg.draw()
-figure_canvas_agg.get_tk_widget().grid(row=2, column=2)
+figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
 
 # Replace the x-axis labels with dates rather than Unix timestamps.
 old_labels = [item.get_position() for item in ax.get_xticklabels()]
@@ -406,8 +597,8 @@ graph_configuration_label.grid(row=0, column=0, sticky='w')
 # Create the elements for the input_grid frame.
 instance_chosen = StringVar()
 combobox_label = Label(input_grid,
-                       text='Select which instance you want to add/remove:',
-                       anchor='sw', wraplength=800, font=app_font)
+                       text='Select the instance you would like to add or '
+                       + 'remove:', anchor='sw', wraplength=800, font=app_font)
 combobox_label.grid(row=1, column=0, sticky='w')
 combobox = ttk.Combobox(input_grid, state='readonly',
                         textvariable=instance_chosen, font=app_textbox_font)
@@ -423,8 +614,8 @@ entries_button = Button(input_grid, height=6, width=20, text='Enter',
                         font=app_font)
 
 save_label = Label(input_grid,
-                   text='\nEnter the file name you want the graph to be saved '
-                   + 'as:', anchor='sw', wraplength=800, font=app_font)
+                   text='\nEnter the file name you would like the graph to be '
+                   + 'saved as:', anchor='sw', wraplength=800, font=app_font)
 save_text_box = Text(input_grid, height=1, width=88, pady=5, padx=2,
                      font=app_textbox_font)
 save_button = Button(input_grid, height=1, width=20, text='Save graph',
@@ -443,7 +634,7 @@ graph_size_grid = Frame(input_grid, height=50, width=300)
 # Add the elements to the input_grid frame.
 entries_label.grid(row=3, column=0, sticky='sw')
 
-dates_grid.grid(row=4, column=0, sticky='w')
+dates_grid.grid(row=4, column=0, sticky='ew')
 
 entries_button.grid(row=4, column=1, rowspan=4, sticky='ns')
 
@@ -486,9 +677,9 @@ height_text_box = Text(graph_size_grid, height=1, width=43, pady=5, padx=5,
                        font=app_textbox_font)
 
 # Add the checkboxes to the graph_size_grid frame.
-width_label.grid(row=0, column=0)
+width_label.grid(row=0, column=0, sticky='w')
 width_text_box.grid(row=1, column=0)
-height_label.grid(row=0, column=1)
+height_label.grid(row=0, column=1, sticky='w')
 height_text_box.grid(row=1, column=1)
 
 # Create the calendars for the dates_grid frame.
@@ -525,6 +716,6 @@ combobox.bind('<<ComboboxSelected>>', instance_changed)
 font_combobox.bind('<<ComboboxSelected>>', font_changed)
 
 # Call the font_size_changed function when a new font size is selected.
-font_size_scale.bind("<ButtonRelease-1>", font_size_changed)
+font_size_scale.bind('<ButtonRelease-1>', font_size_changed)
 
 root.mainloop()
