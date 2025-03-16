@@ -1,6 +1,6 @@
 '''
 This program takes the activity data collected by the back-end and displays it
-in a graph.
+on a graph.
 
 To run this, use: python3 front-end.py
 '''
@@ -97,7 +97,7 @@ def draw_figure(data_df_array, frame, file_name, save):
                 ax.legend(loc='best')
                 break
 
-    # Draw the graph in order to get the x-axis labels.
+    # Draw the graph to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
@@ -159,7 +159,8 @@ def create_dataframe(data):
     return data_df_array
 
 
-# Get the inputs from the entries text box.
+# Get the inputs from the relevant entry elements to provide the required data
+# to create the new graph (and save it if required).
 def get_inputs(data, frame, save):
     # Get the file name.
     file_name = save_text_box.get('1.0', 'end-1c')
@@ -183,7 +184,7 @@ def get_inputs(data, frame, save):
     draw_figure(data_df_array, frame, file_name, save)
 
 
-# Adjust the region that can be scrolled when the information dislayed on the
+# Adjust the region that can be scrolled when the information displayed on the
 # window is changed.
 def on_frame_configure(event):
     canvas.configure(scrollregion=canvas.bbox('all'))
@@ -371,7 +372,7 @@ root.protocol('WM_DELETE_WINDOW', on_closing)
 canvas = Canvas(root, highlightthickness=0)
 canvas.grid(row=0, column=0, sticky='n')
 
-# Create the frame for grouping the other widgets together.
+# Create the frame for grouping the other elements together.
 frame = Frame(canvas)
 canvas.create_window((0, 0), window=frame)
 
@@ -419,7 +420,7 @@ for instance in range(len(listdir('./data_files'))):
     except Exception:
         continue
 
-# Create a DataFrame to set a value for how much data to show initially.
+# Create a DataFrame to set the value for how much data to show initially.
 data_df = DataFrame(data[0][1])
 data_df = data_df.sort_values(by=['week'], ascending=False)
 data_df = data_df.reset_index()
@@ -429,7 +430,7 @@ if len(data_df) < 12:
 else:
     data_quantity = 12
 
-# Create the inital DataFrame using the data_quantity limit.
+# Create the initial DataFrame using the data_quantity limit.
 data_df_array = create_dataframe(data)
 data_df = data_df_array[0][1].head(data_quantity)
 
@@ -443,10 +444,10 @@ for x in font.families():
     font_options.append(x)
 font_options.sort()
 
-# Set a default font.
+# Set the default font.
 font_style = StringVar(value='TkDefaultFont')
 
-# Create the fonts.
+# Create the font variables.
 app_font = font.Font(family=font_style.get(), size=10,
                      weight='normal')
 app_title_font = font.Font(family=font_style.get(), size=15, weight='bold',
@@ -573,7 +574,7 @@ ax.plot(data_df['week'].to_numpy(),
 # Create a graph legend.
 ax.legend(loc='best')
 
-# Draw the graph in order to get the x-axis labels.
+# Draw the graph to get the x-axis labels.
 figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
 figure_canvas_agg.draw()
 figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
@@ -676,7 +677,7 @@ height_label = Label(graph_size_grid, text='Enter the height of the graph' +
 height_text_box = Text(graph_size_grid, height=1, width=43, pady=5, padx=5,
                        font=app_textbox_font)
 
-# Add the checkboxes to the graph_size_grid frame.
+# Add the elements to the graph_size_grid frame.
 width_label.grid(row=0, column=0, sticky='w')
 width_text_box.grid(row=1, column=0)
 height_label.grid(row=0, column=1, sticky='w')
