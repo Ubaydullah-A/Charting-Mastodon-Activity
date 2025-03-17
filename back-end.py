@@ -5,18 +5,23 @@ It is intended to run uninterrupted on a device connected to the internet.
 To run this, use: python3 back-end.py
 '''
 
-from requests import get, exceptions
-from pickle import load, dump
-from datetime import datetime, timedelta, UTC
-from time import sleep
-from urllib.parse import urlparse
-from os import mkdir, path
+try:
+    from requests import get, exceptions
+    from pickle import load, dump
+    from datetime import datetime, timedelta, UTC
+    from time import sleep
+    from urllib.parse import urlparse
+    from os import mkdir, path
+except Exception:
+    raise SystemExit('Please install the required Python packages.\nMore '
+                     + 'information can be found at: https://github.com/'
+                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
-# Ask user for instance.
+# Ask the user for the URL of an instance.
 instance = input('Please enter the URL of the instance you would like to ' +
                  'monitor (such as https://mastodon.social/): ')
 
-# Get new data via the API.
+# Test that the program can collect new data via the API.
 requested_data = ''
 try:
     requested_data = get(instance + 'api/v1/instance/activity').json()
@@ -54,10 +59,10 @@ sleep(datetime.timestamp(next_collection) - datetime.timestamp(datetime.now()))
 attempts = 0
 while True:
     failed_to_collect = False
-    # Get new data via the API.
+    # Collect new data via the API.
     requested_data = ''
-    print('Attempting to collect activity data.\nPlease do NOT terminate ' +
-          'during this process.')
+    print('Attempting to collect activity data.\nPlease do **NOT** terminate '
+          + 'the program during this process.')
     try:
         requested_data = get(instance + 'api/v1/instance/activity').json()
     except exceptions.RequestException:
@@ -65,7 +70,7 @@ while True:
         failed_to_collect = True
 
     if not failed_to_collect:
-        # Format data to avoid duplicate days.
+        # Format the data to avoid duplicate days.
         exists = False
         for requested_data_entry in range(1, len(requested_data)):
             requested_data[requested_data_entry]['week'] = \
@@ -85,8 +90,8 @@ while True:
                 requested_data[requested_data_entry]['count'] = '1'
                 data.append(requested_data[requested_data_entry])
             else:
-                # Sum old and new 'statuses', 'logins' and 'registrations', and
-                # increment 'count'.
+                # Sum the old and new 'statuses', 'logins', and
+                # 'registrations', and increment 'count'.
                 # This is used to handle data inconsistencies between requests.
                 data[data_entry]['statuses'] = \
                     str(int(data[data_entry]['statuses']) +
@@ -102,7 +107,7 @@ while True:
                                                     ) + 1)
                 continue
 
-        # Store new data.
+        # Store the new data.
         try:
             write_data = open('./data_files/' + file_name.netloc, 'wb')
             dump(data, write_data)
@@ -119,19 +124,20 @@ while True:
         print('Attempt', attempts, 'failed.')
         match attempts:
             case 1:
-                # Reattempt data collection 1 hour after original attempt.
+                # Reattempt data collection 1 hour after the original attempt.
                 attempt_1 = next_collection.replace(hour=11)
                 print('Retrying data collection in approximately 1 hour.')
                 sleep(datetime.timestamp(attempt_1)
                       - datetime.timestamp(datetime.now()))
             case 2:
-                # Reattempt data collection after 6 hours.
+                # Reattempt data collection 6 hours after the original attempt.
                 attempt_2 = next_collection.replace(hour=16)
                 print('Retrying data collection in approximately 5 hours.')
                 sleep(datetime.timestamp(attempt_2)
                       - datetime.timestamp(datetime.now()))
             case 3:
-                # Reattempt data collection after 12 hours.
+                # Reattempt data collection 12 hours after the original
+                # attempt.
                 attempt_3 = next_collection.replace(hour=22)
                 print('Retrying data collection in approximately 6 hours.')
                 sleep(datetime.timestamp(attempt_3)
@@ -141,7 +147,8 @@ while True:
         print('Attempt', attempts, 'failed.')
         print('No data collected today.')
 
-    # Ensure that the program only requests data once every 24 hours.
+    # Ensure that the program only successfully requests data a maximum of once
+    # every 24 hours.
     next_collection = next_collection + timedelta(days=1)
     print('Next data collection:', str(next_collection))
     print('')

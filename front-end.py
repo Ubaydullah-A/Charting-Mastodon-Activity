@@ -1,24 +1,29 @@
 '''
 This program takes the activity data collected by the back-end and displays it
-in a graph.
+on a graph.
 
 To run this, use: python3 front-end.py
 '''
 
-import numpy
-from pickle import load
-from matplotlib.pyplot import close, subplots
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from pandas import DataFrame
-from sys import exit
-from datetime import datetime
-from time import mktime, strptime
-from tkcalendar import DateEntry
-from tkinter import (Tk, ttk, messagebox, Canvas, Frame, BooleanVar, StringVar,
-                     Label, Button, Checkbutton, Text, font, Scale,
-                     colorchooser)
-from os import listdir, mkdir, path
-from pathvalidate import is_valid_filename, sanitize_filename
+try:
+    import numpy
+    from pickle import load
+    from matplotlib.pyplot import close, subplots
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    from pandas import DataFrame
+    from sys import exit
+    from datetime import datetime
+    from time import mktime, strptime
+    from tkcalendar import DateEntry
+    from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
+                         Button, Checkbutton, Text, font, Scale, colorchooser)
+    from tkinter.messagebox import showinfo, showerror, askokcancel
+    from os import listdir, mkdir, path
+    from pathvalidate import is_valid_filename, sanitize_filename
+except Exception:
+    raise SystemExit('Please install the required Python packages.\nMore '
+                     + 'information can be found at: https://github.com/'
+                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
 
 # Plot the graph.
@@ -43,24 +48,22 @@ def draw_figure(data_df_array, frame, file_name, save):
         fig.set_figheight(int(height_value))
     elif width_value.isdigit() and height_value != '':
         fig.set_figwidth(int(width_value))
-        messagebox.showerror(title='Invalid height', message='The height '
-                             + 'entered was invalid.\nThe height has been '
-                             + 'reset.')
+        showerror(title='Invalid height', message='The height entered was '
+                  + 'invalid.\nThe height has been reset.')
     elif height_value.isdigit() and width_value != '':
         fig.set_figheight(int(height_value))
-        messagebox.showerror(title='Invalid width', message='The width entered'
-                             + ' was invalid.\nThe width has been reset.')
+        showerror(title='Invalid width', message='The width entered was '
+                  + 'invalid.\nThe width has been reset.')
     elif width_value != '' and height_value != '':
-        messagebox.showerror(title='Invalid dimensions', message='The width '
-                             + 'and height values entered were invalid.\nThe '
-                             + 'dimensions have been reset.')
+        showerror(title='Invalid dimensions', message='The width and height '
+                  + 'values entered were invalid.\nThe dimensions have been '
+                  + 'reset.')
     elif width_value != '':
-        messagebox.showerror(title='Invalid width', message='The width entered'
-                             + ' was invalid.\nThe width has been reset.')
+        showerror(title='Invalid width', message='The width entered was '
+                  + 'invalid.\nThe width has been reset.')
     elif height_value != '':
-        messagebox.showerror(title='Invalid height', message='The height '
-                             + 'entered was invalid.\nThe height has been '
-                             + 'reset.')
+        showerror(title='Invalid height', message='The height entered was '
+                  + 'invalid.\nThe height has been reset.')
 
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
@@ -97,7 +100,7 @@ def draw_figure(data_df_array, frame, file_name, save):
                 ax.legend(loc='best')
                 break
 
-    # Draw the graph in order to get the x-axis labels.
+    # Draw the graph to get the x-axis labels.
     figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
@@ -118,27 +121,24 @@ def draw_figure(data_df_array, frame, file_name, save):
         if file_name != '':
             if (is_valid_filename(file_name)):
                 fig.savefig('./graphs/' + file_name)
-                messagebox.showinfo(title='Graph saved', message='Graph saved '
-                                    + 'as \'' + file_name + '\'.')
+                showinfo(title='Graph saved', message='Graph saved as \''
+                         + file_name + '\'.')
             else:
                 if sanitize_filename(file_name) != '':
-                    messagebox.showerror(title='Invalid file name',
-                                         message='The graph was not saved.\n'
-                                         + 'Did you mean \''
-                                         + sanitize_filename(file_name)
-                                         + '\'?')
+                    showerror(title='Invalid file name', message='The graph '
+                              + 'was not saved.\nDid you mean \''
+                              + sanitize_filename(file_name) + '\'?')
                 else:
-                    messagebox.showerror(title='Invalid file name',
-                                         message='The graph was not saved.')
+                    showerror(title='Invalid file name', message='The graph '
+                              + 'was not saved.')
         else:
             fig.savefig('./graphs/graph')
-            messagebox.showinfo(title='Graph saved', message='Graph saved as '
-                                + '\'graph\'.')
+            showinfo(title='Graph saved', message='Graph saved as \'graph\'.')
 
 
 # Ask for confirmation before closing the program.
 def on_closing():
-    if messagebox.askokcancel('Quit', 'Do you want to quit?'):
+    if askokcancel('Quit', 'Do you want to quit?'):
         exit()
 
 
@@ -159,7 +159,8 @@ def create_dataframe(data):
     return data_df_array
 
 
-# Get the inputs from the entries text box.
+# Get the inputs from the relevant entry elements to provide the required data
+# to create the new graph (and save it if required).
 def get_inputs(data, frame, save):
     # Get the file name.
     file_name = save_text_box.get('1.0', 'end-1c')
@@ -183,7 +184,7 @@ def get_inputs(data, frame, save):
     draw_figure(data_df_array, frame, file_name, save)
 
 
-# Adjust the region that can be scrolled when the information dislayed on the
+# Adjust the region that can be scrolled when the information displayed on the
 # window is changed.
 def on_frame_configure(event):
     canvas.configure(scrollregion=canvas.bbox('all'))
@@ -371,7 +372,7 @@ root.protocol('WM_DELETE_WINDOW', on_closing)
 canvas = Canvas(root, highlightthickness=0)
 canvas.grid(row=0, column=0, sticky='n')
 
-# Create the frame for grouping the other widgets together.
+# Create the frame for grouping the other elements together.
 frame = Frame(canvas)
 canvas.create_window((0, 0), window=frame)
 
@@ -419,7 +420,7 @@ for instance in range(len(listdir('./data_files'))):
     except Exception:
         continue
 
-# Create a DataFrame to set a value for how much data to show initially.
+# Create a DataFrame to set the value for how much data to show initially.
 data_df = DataFrame(data[0][1])
 data_df = data_df.sort_values(by=['week'], ascending=False)
 data_df = data_df.reset_index()
@@ -429,7 +430,7 @@ if len(data_df) < 12:
 else:
     data_quantity = 12
 
-# Create the inital DataFrame using the data_quantity limit.
+# Create the initial DataFrame using the data_quantity limit.
 data_df_array = create_dataframe(data)
 data_df = data_df_array[0][1].head(data_quantity)
 
@@ -443,10 +444,10 @@ for x in font.families():
     font_options.append(x)
 font_options.sort()
 
-# Set a default font.
+# Set the default font.
 font_style = StringVar(value='TkDefaultFont')
 
-# Create the fonts.
+# Create the font variables.
 app_font = font.Font(family=font_style.get(), size=10,
                      weight='normal')
 app_title_font = font.Font(family=font_style.get(), size=15, weight='bold',
@@ -573,7 +574,7 @@ ax.plot(data_df['week'].to_numpy(),
 # Create a graph legend.
 ax.legend(loc='best')
 
-# Draw the graph in order to get the x-axis labels.
+# Draw the graph to get the x-axis labels.
 figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
 figure_canvas_agg.draw()
 figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
@@ -676,7 +677,7 @@ height_label = Label(graph_size_grid, text='Enter the height of the graph' +
 height_text_box = Text(graph_size_grid, height=1, width=43, pady=5, padx=5,
                        font=app_textbox_font)
 
-# Add the checkboxes to the graph_size_grid frame.
+# Add the elements to the graph_size_grid frame.
 width_label.grid(row=0, column=0, sticky='w')
 width_text_box.grid(row=1, column=0)
 height_label.grid(row=0, column=1, sticky='w')
@@ -684,13 +685,15 @@ height_text_box.grid(row=1, column=1)
 
 # Create the calendars for the dates_grid frame.
 start_date = datetime.fromtimestamp(float(old_labels[0])).strftime('%d/%m/%Y')
-date1 = DateEntry(dates_grid, width=42, font=app_textbox_font)
+date1 = DateEntry(dates_grid, state='readonly', width=42,
+                  font=app_textbox_font)
 date1.set_date(start_date)
 
 end_date = datetime.fromtimestamp(float(
                                   old_labels[len(
                                     old_labels)-1])).strftime('%d/%m/%Y')
-date2 = DateEntry(dates_grid, width=43, font=app_textbox_font)
+date2 = DateEntry(dates_grid, state='readonly', width=43,
+                  font=app_textbox_font)
 date2.set_date(end_date)
 
 # Add the calendars to the dates_grid frame.

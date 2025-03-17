@@ -19,7 +19,7 @@ The back-end collects the appropriate activity data from a Mastodon instance. It
 To run this, use: python3 back-end.py
 
 ### Front-end
-The front-end takes the activity data collected by the back-end and displays it in a graph.
+The front-end takes the activity data collected by the back-end and displays it on a graph.
 
 To run this, use: python3 front-end.py
 
