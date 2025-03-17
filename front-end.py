@@ -382,8 +382,9 @@ label = Label(welcome_window, font=welcome_font, text='This application takes '
               + 'can do this using:')
 command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
                 + 'back-end.py')
-label_2 = Label(welcome_window, font=welcome_font, text='\nMore information '
-                + 'can be found at:')
+label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
+                + 'including how to install the required Python packages, can '
+                + 'be found at:')
 link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
              + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
 label_3 = Label(welcome_window, font=welcome_font, text='')
