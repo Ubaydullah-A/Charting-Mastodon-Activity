@@ -26,6 +26,18 @@ except Exception:
                      + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
 
+# Open a URL.
+def open_url(URL):
+    open_new_tab(URL)
+
+
+# Copy the command to run the back-end to the clipboard.
+def copy_command(root):
+    root.clipboard_append('python3 back-end.py')
+    showinfo(title='Command copied', message='The command has been copied to '
+             + 'your clipboard.')
+
+
 # Plot the graph.
 def draw_figure(data_df_array, frame, file_name, save):
     # Remove the old graph.
@@ -358,6 +370,42 @@ def choose_highlight_colour():
     style.configure('Horizontal.TScrollbar',
                     background=chosen_highlight_colour[1])
 
+
+# Create a welcome message window.
+welcome_window = Tk()
+welcome_window.title('Welcome')
+welcome_font = font.Font(size=15)
+
+label = Label(welcome_window, font=welcome_font, text='This application takes '
+              + 'the activity data of Mastodon instances and displays it on '
+              + 'a graph.\n\nIf you have not collected any activity data, you '
+              + 'can do this using:')
+command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
+                + 'back-end.py')
+label_2 = Label(welcome_window, font=welcome_font, text='\nMore information '
+                + 'can be found at:')
+link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
+             + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
+label_3 = Label(welcome_window, font=welcome_font, text='')
+close_button = Button(welcome_window, text='Close', command=lambda:
+                      welcome_window.destroy(), font=welcome_font)
+label.pack()
+command.pack()
+label_2.pack()
+link.pack()
+label_3.pack()
+close_button.pack()
+
+# Set the initial window size.
+welcome_window.geometry('1000x300')
+
+# Call the copy_command function when the command text is clicked.
+command.bind("<Button-1>", lambda e: copy_command(welcome_window))
+
+# Call the open_url function when the URL text is clicked.
+link.bind("<Button-1>", lambda e: open_url('https://github.com/Ubaydullah-A/'
+          + 'Charting-Mastodon-Activity'))
+welcome_window.mainloop()
 
 # Create the window.
 root = Tk()
