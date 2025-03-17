@@ -5,20 +5,25 @@ on a graph.
 To run this, use: python3 front-end.py
 '''
 
-import numpy
-from pickle import load
-from matplotlib.pyplot import close, subplots
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from pandas import DataFrame
-from sys import exit
-from datetime import datetime
-from time import mktime, strptime
-from tkcalendar import DateEntry
-from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
-                     Button, Checkbutton, Text, font, Scale, colorchooser)
-from tkinter.messagebox import showinfo, showerror, askokcancel
-from os import listdir, mkdir, path
-from pathvalidate import is_valid_filename, sanitize_filename
+try:
+    import numpy
+    from pickle import load
+    from matplotlib.pyplot import close, subplots
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    from pandas import DataFrame
+    from sys import exit
+    from datetime import datetime
+    from time import mktime, strptime
+    from tkcalendar import DateEntry
+    from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
+                         Button, Checkbutton, Text, font, Scale, colorchooser)
+    from tkinter.messagebox import showinfo, showerror, askokcancel
+    from os import listdir, mkdir, path
+    from pathvalidate import is_valid_filename, sanitize_filename
+except Exception:
+    raise SystemExit('Please install the required Python packages.\nMore '
+                     + 'information can be found at: https://github.com/'
+                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
 
 # Plot the graph.

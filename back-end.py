@@ -5,12 +5,17 @@ It is intended to run uninterrupted on a device connected to the internet.
 To run this, use: python3 back-end.py
 '''
 
-from requests import get, exceptions
-from pickle import load, dump
-from datetime import datetime, timedelta, UTC
-from time import sleep
-from urllib.parse import urlparse
-from os import mkdir, path
+try:
+    from requests import get, exceptions
+    from pickle import load, dump
+    from datetime import datetime, timedelta, UTC
+    from time import sleep
+    from urllib.parse import urlparse
+    from os import mkdir, path
+except Exception:
+    raise SystemExit('Please install the required Python packages.\nMore '
+                     + 'information can be found at: https://github.com/'
+                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
 # Ask the user for the URL of an instance.
 instance = input('Please enter the URL of the instance you would like to ' +
