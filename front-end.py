@@ -14,9 +14,9 @@ from sys import exit
 from datetime import datetime
 from time import mktime, strptime
 from tkcalendar import DateEntry
-from tkinter import (Tk, ttk, messagebox, Canvas, Frame, BooleanVar, StringVar,
-                     Label, Button, Checkbutton, Text, font, Scale,
-                     colorchooser)
+from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
+                     Button, Checkbutton, Text, font, Scale, colorchooser)
+from tkinter.messagebox import showinfo, showerror, askokcancel
 from os import listdir, mkdir, path
 from pathvalidate import is_valid_filename, sanitize_filename
 
@@ -43,24 +43,22 @@ def draw_figure(data_df_array, frame, file_name, save):
         fig.set_figheight(int(height_value))
     elif width_value.isdigit() and height_value != '':
         fig.set_figwidth(int(width_value))
-        messagebox.showerror(title='Invalid height', message='The height '
-                             + 'entered was invalid.\nThe height has been '
-                             + 'reset.')
+        showerror(title='Invalid height', message='The height entered was '
+                  + 'invalid.\nThe height has been reset.')
     elif height_value.isdigit() and width_value != '':
         fig.set_figheight(int(height_value))
-        messagebox.showerror(title='Invalid width', message='The width entered'
-                             + ' was invalid.\nThe width has been reset.')
+        showerror(title='Invalid width', message='The width entered was '
+                  + 'invalid.\nThe width has been reset.')
     elif width_value != '' and height_value != '':
-        messagebox.showerror(title='Invalid dimensions', message='The width '
-                             + 'and height values entered were invalid.\nThe '
-                             + 'dimensions have been reset.')
+        showerror(title='Invalid dimensions', message='The width and height '
+                  + 'values entered were invalid.\nThe dimensions have been '
+                  + 'reset.')
     elif width_value != '':
-        messagebox.showerror(title='Invalid width', message='The width entered'
-                             + ' was invalid.\nThe width has been reset.')
+        showerror(title='Invalid width', message='The width entered was '
+                  + 'invalid.\nThe width has been reset.')
     elif height_value != '':
-        messagebox.showerror(title='Invalid height', message='The height '
-                             + 'entered was invalid.\nThe height has been '
-                             + 'reset.')
+        showerror(title='Invalid height', message='The height entered was '
+                  + 'invalid.\nThe height has been reset.')
 
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
@@ -118,27 +116,24 @@ def draw_figure(data_df_array, frame, file_name, save):
         if file_name != '':
             if (is_valid_filename(file_name)):
                 fig.savefig('./graphs/' + file_name)
-                messagebox.showinfo(title='Graph saved', message='Graph saved '
-                                    + 'as \'' + file_name + '\'.')
+                showinfo(title='Graph saved', message='Graph saved as \''
+                         + file_name + '\'.')
             else:
                 if sanitize_filename(file_name) != '':
-                    messagebox.showerror(title='Invalid file name',
-                                         message='The graph was not saved.\n'
-                                         + 'Did you mean \''
-                                         + sanitize_filename(file_name)
-                                         + '\'?')
+                    showerror(title='Invalid file name', message='The graph '
+                              + 'was not saved.\nDid you mean \''
+                              + sanitize_filename(file_name) + '\'?')
                 else:
-                    messagebox.showerror(title='Invalid file name',
-                                         message='The graph was not saved.')
+                    showerror(title='Invalid file name', message='The graph '
+                              + 'was not saved.')
         else:
             fig.savefig('./graphs/graph')
-            messagebox.showinfo(title='Graph saved', message='Graph saved as '
-                                + '\'graph\'.')
+            showinfo(title='Graph saved', message='Graph saved as \'graph\'.')
 
 
 # Ask for confirmation before closing the program.
 def on_closing():
-    if messagebox.askokcancel('Quit', 'Do you want to quit?'):
+    if askokcancel('Quit', 'Do you want to quit?'):
         exit()
 
 
