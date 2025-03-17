@@ -680,13 +680,15 @@ height_text_box.grid(row=1, column=1)
 
 # Create the calendars for the dates_grid frame.
 start_date = datetime.fromtimestamp(float(old_labels[0])).strftime('%d/%m/%Y')
-date1 = DateEntry(dates_grid, width=42, font=app_textbox_font)
+date1 = DateEntry(dates_grid, state='readonly', width=42,
+                  font=app_textbox_font)
 date1.set_date(start_date)
 
 end_date = datetime.fromtimestamp(float(
                                   old_labels[len(
                                     old_labels)-1])).strftime('%d/%m/%Y')
-date2 = DateEntry(dates_grid, width=43, font=app_textbox_font)
+date2 = DateEntry(dates_grid, state='readonly', width=43,
+                  font=app_textbox_font)
 date2.set_date(end_date)
 
 # Add the calendars to the dates_grid frame.
