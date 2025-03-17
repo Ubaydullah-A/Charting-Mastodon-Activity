@@ -5,25 +5,10 @@ on a graph.
 To run this, use: python3 front-end.py
 '''
 
-try:
-    import numpy
-    from pickle import load
-    from matplotlib.pyplot import close, subplots
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-    from pandas import DataFrame
-    from sys import exit
-    from datetime import datetime
-    from time import mktime, strptime
-    from tkcalendar import DateEntry
-    from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
-                         Button, Checkbutton, Text, font, Scale, colorchooser)
-    from tkinter.messagebox import showinfo, showerror, askokcancel
-    from os import listdir, mkdir, path
-    from pathvalidate import is_valid_filename, sanitize_filename
-except Exception:
-    raise SystemExit('Please install the required Python packages.\nMore '
-                     + 'information can be found at: https://github.com/'
-                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
+from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
+                     Button, Checkbutton, Text, font, Scale, colorchooser)
+from tkinter.messagebox import showinfo, showerror, askokcancel
+from webbrowser import open_new_tab
 
 
 # Open a URL.
@@ -36,6 +21,62 @@ def copy_command(root):
     root.clipboard_append('python3 back-end.py')
     showinfo(title='Command copied', message='The command has been copied to '
              + 'your clipboard.')
+
+
+# Create a welcome message window.
+welcome_window = Tk()
+welcome_window.title('Welcome')
+welcome_font = font.Font(size=15)
+
+label = Label(welcome_window, font=welcome_font, text='This application takes '
+              + 'the activity data of Mastodon instances and displays it on '
+              + 'a graph.\n\nIf you have not collected any activity data, you '
+              + 'can do this using:')
+command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
+                + 'back-end.py')
+label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
+                + 'including how to install the required Python packages, can '
+                + 'be found at:')
+link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
+             + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
+label_3 = Label(welcome_window, font=welcome_font, text='')
+close_button = Button(welcome_window, text='Close', command=lambda:
+                      welcome_window.destroy(), font=welcome_font)
+label.pack()
+command.pack()
+label_2.pack()
+link.pack()
+label_3.pack()
+close_button.pack()
+
+# Set the initial window size.
+welcome_window.geometry('1000x300')
+
+# Call the copy_command function when the command text is clicked.
+command.bind("<Button-1>", lambda e: copy_command(welcome_window))
+
+# Call the open_url function when the URL text is clicked.
+link.bind("<Button-1>", lambda e: open_url('https://github.com/Ubaydullah-A/'
+          + 'Charting-Mastodon-Activity'))
+
+welcome_window.mainloop()
+
+try:
+    import numpy
+    from pickle import load
+    from matplotlib.pyplot import close, subplots
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    from pandas import DataFrame
+    from sys import exit
+    from datetime import datetime
+    from time import mktime, strptime
+    from tkcalendar import DateEntry
+    from os import listdir, mkdir, path
+    from pathvalidate import is_valid_filename, sanitize_filename
+except Exception:
+    raise SystemExit('Please install the required Python packages.\nMore '
+                     + 'information can be found at: https://github.com/'
+                     + 'Ubaydullah-A/Charting-Mastodon-Activity')
 
 
 # Plot the graph.
@@ -370,43 +411,6 @@ def choose_highlight_colour():
     style.configure('Horizontal.TScrollbar',
                     background=chosen_highlight_colour[1])
 
-
-# Create a welcome message window.
-welcome_window = Tk()
-welcome_window.title('Welcome')
-welcome_font = font.Font(size=15)
-
-label = Label(welcome_window, font=welcome_font, text='This application takes '
-              + 'the activity data of Mastodon instances and displays it on '
-              + 'a graph.\n\nIf you have not collected any activity data, you '
-              + 'can do this using:')
-command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
-                + 'back-end.py')
-label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
-                + 'including how to install the required Python packages, can '
-                + 'be found at:')
-link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
-             + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
-label_3 = Label(welcome_window, font=welcome_font, text='')
-close_button = Button(welcome_window, text='Close', command=lambda:
-                      welcome_window.destroy(), font=welcome_font)
-label.pack()
-command.pack()
-label_2.pack()
-link.pack()
-label_3.pack()
-close_button.pack()
-
-# Set the initial window size.
-welcome_window.geometry('1000x300')
-
-# Call the copy_command function when the command text is clicked.
-command.bind("<Button-1>", lambda e: copy_command(welcome_window))
-
-# Call the open_url function when the URL text is clicked.
-link.bind("<Button-1>", lambda e: open_url('https://github.com/Ubaydullah-A/'
-          + 'Charting-Mastodon-Activity'))
-welcome_window.mainloop()
 
 # Create the window.
 root = Tk()
