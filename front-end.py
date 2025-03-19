@@ -50,7 +50,7 @@ label_3.pack()
 close_button.pack()
 
 # Set the initial window size.
-welcome_window.geometry('1000x300')
+welcome_window.geometry('1050x300')
 
 # Call the copy_command function when the command text is clicked.
 command.bind("<Button-1>", lambda e: copy_command(welcome_window))
@@ -297,6 +297,7 @@ def choose_bg_colour():
     input_grid.configure(bg=chosen_bg_colour[1])
     configuration_grid.configure(bg=chosen_bg_colour[1])
     dates_grid.configure(bg=chosen_bg_colour[1])
+    checkbox_grid.configure(bg=chosen_bg_colour[1])
     window_configuration_label.configure(bg=chosen_bg_colour[1])
     change_font_label.configure(bg=chosen_bg_colour[1])
     change_font_size_label.configure(bg=chosen_bg_colour[1])
@@ -367,16 +368,22 @@ def choose_text_colour():
     entries_label.configure(fg=chosen_text_colour[1])
     entries_button.configure(fg=chosen_text_colour[1])
     save_label.configure(fg=chosen_text_colour[1])
-    save_text_box.configure(fg=chosen_text_colour[1])
+    save_text_box.configure(fg=chosen_text_colour[1],
+                            selectforeground=chosen_text_colour[1])
     save_button.configure(fg=chosen_text_colour[1])
     statuses_checkbox.configure(fg=chosen_text_colour[1])
     logins_checkbox.configure(fg=chosen_text_colour[1])
     registrations_checkbox.configure(fg=chosen_text_colour[1])
     width_label.configure(fg=chosen_text_colour[1])
-    width_text_box.configure(fg=chosen_text_colour[1])
+    width_text_box.configure(fg=chosen_text_colour[1],
+                             selectforeground=chosen_text_colour[1])
     height_label.configure(fg=chosen_text_colour[1])
-    height_text_box.configure(fg=chosen_text_colour[1])
-    style.configure('DateEntry', foreground=chosen_text_colour[1])
+    height_text_box.configure(fg=chosen_text_colour[1],
+                              selectforeground=chosen_text_colour[1])
+    style.configure('DateEntry', foreground=chosen_text_colour[1],
+                    selectforeground=chosen_text_colour[1])
+    style.configure('TCombobox', foreground=chosen_text_colour[1],
+                    selectforeground=chosen_text_colour[1])
 
 
 # Explicitly change the colour of every relevant button element.
@@ -407,10 +414,15 @@ def choose_highlight_colour():
     entries_button.configure(highlightbackground=chosen_highlight_colour[1])
     save_button.configure(highlightbackground=chosen_highlight_colour[1])
     separator.configure(bg=chosen_highlight_colour[1])
+    save_text_box.configure(selectbackground=chosen_highlight_colour[1])
+    width_text_box.configure(selectbackground=chosen_highlight_colour[1])
+    height_text_box.configure(selectbackground=chosen_highlight_colour[1])
     style.configure('Vertical.TScrollbar',
                     background=chosen_highlight_colour[1])
     style.configure('Horizontal.TScrollbar',
                     background=chosen_highlight_colour[1])
+    style.configure('DateEntry', selectbackground=chosen_highlight_colour[1])
+    style.configure('TCombobox', selectbackground=chosen_highlight_colour[1])
 
 
 # Create the window.
@@ -496,6 +508,7 @@ configuration_grid.grid(row=1, column=1, rowspan=5, sticky='ns')
 font_options = []
 for x in font.families():
     font_options.append(x)
+font_options = list(dict.fromkeys(font_options))
 font_options.sort()
 
 # Set the default font.
