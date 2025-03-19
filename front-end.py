@@ -290,7 +290,7 @@ def font_size_changed(event):
 
 # Explicitly change the background colour of every relevant element.
 def choose_bg_colour():
-    chosen_bg_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_bg_colour = colorchooser.askcolor(title='Choose background colour')
     root.configure(bg=chosen_bg_colour[1])
     canvas.configure(bg=chosen_bg_colour[1])
     frame.configure(bg=chosen_bg_colour[1])
@@ -340,7 +340,7 @@ def choose_bg_colour():
 
 # Explicitly change the colour of every relevant input element.
 def choose_input_colour():
-    chosen_input_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_input_colour = colorchooser.askcolor(title='Choose input colour')
     style.configure('TCombobox', background=chosen_input_colour[1])
     font_size_scale.configure(troughcolor=chosen_input_colour[1])
     style.configure('DateEntry', fieldbackground=chosen_input_colour[1],
@@ -352,7 +352,7 @@ def choose_input_colour():
 
 # Explicitly change the colour of every relevant text element.
 def choose_text_colour():
-    chosen_text_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_text_colour = colorchooser.askcolor(title='Choose text colour')
     window_configuration_label.configure(fg=chosen_text_colour[1])
     change_font_label.configure(fg=chosen_text_colour[1])
     change_font_size_label.configure(fg=chosen_text_colour[1])
@@ -381,7 +381,7 @@ def choose_text_colour():
 
 # Explicitly change the colour of every relevant button element.
 def choose_button_colour():
-    chosen_button_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_button_colour = colorchooser.askcolor(title='Choose button colour')
     text_colour_button.configure(bg=chosen_button_colour[1])
     bg_colour_button.configure(bg=chosen_button_colour[1])
     input_colour_button.configure(bg=chosen_button_colour[1])
@@ -393,7 +393,8 @@ def choose_button_colour():
 
 # Explicitly change the highlight colour of every relevant element.
 def choose_highlight_colour():
-    chosen_highlight_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_highlight_colour = colorchooser.askcolor(title='Choose highlight '
+                                                    + 'colour')
     text_colour_button.configure(
         highlightbackground=chosen_highlight_colour[1])
     bg_colour_button.configure(highlightbackground=chosen_highlight_colour[1])
