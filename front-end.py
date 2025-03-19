@@ -5,9 +5,9 @@ on a graph.
 To run this, use: python3 front-end.py
 '''
 
-from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
-                     Button, Checkbutton, Text, font, Scale, colorchooser)
-from tkinter.messagebox import showinfo, showerror, askokcancel
+from tkinter import (Tk, ttk, Canvas, Text, Button, StringVar, Label, Toplevel,
+                     BooleanVar, Checkbutton, Frame, font, Scale, colorchooser)
+from tkinter.messagebox import showinfo, askokcancel
 from webbrowser import open_new_tab
 
 
@@ -101,22 +101,36 @@ def draw_figure(data_df_array, frame, file_name, save):
         fig.set_figheight(int(height_value))
     elif width_value.isdigit() and height_value != '':
         fig.set_figwidth(int(width_value))
-        showerror(title='Invalid height', message='The height entered was '
-                  + 'invalid.\nThe height has been reset.')
+        pop_up_window.title('Invalid height')
+        pop_up_label.configure(text='The height entered was invalid.\nThe '
+                              + 'height has been reset.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
     elif height_value.isdigit() and width_value != '':
         fig.set_figheight(int(height_value))
-        showerror(title='Invalid width', message='The width entered was '
-                  + 'invalid.\nThe width has been reset.')
+        pop_up_window.title('Invalid width')
+        pop_up_label.configure(text='The width entered was invalid.\nThe width '
+                              + 'has been reset.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
     elif width_value != '' and height_value != '':
-        showerror(title='Invalid dimensions', message='The width and height '
-                  + 'values entered were invalid.\nThe dimensions have been '
-                  + 'reset.')
+        pop_up_window.title('Invalid dimensions')
+        pop_up_label.configure(text='The width and height values entered were '
+                              + 'invalid.\nThe dimensions have been reset.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
     elif width_value != '':
-        showerror(title='Invalid width', message='The width entered was '
-                  + 'invalid.\nThe width has been reset.')
+        pop_up_window.title('Invalid width')
+        pop_up_label.configure(text='The width entered was invalid.\nThe width '
+                              + 'has been reset.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
     elif height_value != '':
-        showerror(title='Invalid height', message='The height entered was '
-                  + 'invalid.\nThe height has been reset.')
+        pop_up_window.title('Invalid height')
+        pop_up_label.configure(text='The height entered was invalid.\nThe '
+                              + 'height has been reset.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
 
     # Plot the data on the graph.
     for index in range(len(data_df_array)):
@@ -174,19 +188,31 @@ def draw_figure(data_df_array, frame, file_name, save):
         if file_name != '':
             if (is_valid_filename(file_name)):
                 fig.savefig('./graphs/' + file_name)
-                showinfo(title='Graph saved', message='Graph saved as \''
-                         + file_name + '\'.')
+                pop_up_window.title('Graph saved')
+                pop_up_label.configure(text='Graph saved as \'' + file_name
+                                       + '\'.')
+                pop_up_window.geometry('')
+                pop_up_window.deiconify()
             else:
                 if sanitize_filename(file_name) != '':
-                    showerror(title='Invalid file name', message='The graph '
-                              + 'was not saved.\nDid you mean \''
-                              + sanitize_filename(file_name) + '\'?')
+                    pop_up_window.title('Invalid file name')
+                    pop_up_label.configure(text='The graph was not saved.\nDid '
+                                          + 'you mean \''
+                                          + sanitize_filename(file_name)
+                                          + '\'?')
+                    pop_up_window.geometry('')
+                    pop_up_window.deiconify()
                 else:
-                    showerror(title='Invalid file name', message='The graph '
-                              + 'was not saved.')
+                    pop_up_window.title('Invalid file name')
+                    pop_up_label.configure(text='The graph was not saved.')
+                    pop_up_window.geometry('')
+                    pop_up_window.deiconify()
         else:
             fig.savefig('./graphs/graph')
-            showinfo(title='Graph saved', message='Graph saved as \'graph\'.')
+            pop_up_window.title('Graph saved')
+            pop_up_label.configure(text='Graph saved as \'graph\'.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
 
 
 # Ask for confirmation before closing the program.
@@ -267,6 +293,7 @@ def instance_changed(event):
 def font_changed(event):
     app_font.configure(family=font_chosen.get())
     app_title_font.configure(family=font_chosen.get())
+    app_pop_up_font.configure(family=font_chosen.get())
 
 
 # Change the font size when a new font size is selected, and adjust the widths
@@ -274,6 +301,7 @@ def font_changed(event):
 def font_size_changed(event):
     app_font.configure(size=font_size_scale.get())
     app_title_font.configure(size=font_size_scale.get() + 5)
+    app_pop_up_font.configure(size=font_size_scale.get() + 5)
     app_textbox_font.configure(size=font_size_scale.get())
     app_width_1 = int(round((1/font_size_scale.get()) * 420))
     app_width_2 = int(round((1/font_size_scale.get()) * 430))
@@ -337,6 +365,8 @@ def choose_bg_colour():
     width_text_box.configure(highlightbackground=chosen_bg_colour[1])
     height_text_box.configure(highlightbackground=chosen_bg_colour[1])
     save_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    pop_up_window.configure(bg=chosen_bg_colour[1])
+    pop_up_label.configure(bg=chosen_bg_colour[1])
 
 
 # Explicitly change the colour of every relevant input element.
@@ -384,6 +414,8 @@ def choose_text_colour():
                     selectforeground=chosen_text_colour[1])
     style.configure('TCombobox', foreground=chosen_text_colour[1],
                     selectforeground=chosen_text_colour[1])
+    pop_up_label.configure(fg=chosen_text_colour[1])
+    pop_up_close_button.configure(fg=chosen_text_colour[1])
 
 
 # Explicitly change the colour of every relevant button element.
@@ -396,6 +428,7 @@ def choose_button_colour():
     highlight_colour_button.configure(bg=chosen_button_colour[1])
     entries_button.configure(bg=chosen_button_colour[1])
     save_button.configure(bg=chosen_button_colour[1])
+    pop_up_close_button.configure(bg=chosen_button_colour[1])
 
 
 # Explicitly change the highlight colour of every relevant element.
@@ -426,6 +459,12 @@ def choose_highlight_colour():
                     background=chosen_highlight_colour[1])
     style.configure('DateEntry', selectbackground=chosen_highlight_colour[1])
     style.configure('TCombobox', selectbackground=chosen_highlight_colour[1])
+    pop_up_close_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
+
+
+def withdraw_pop_ups():
+    pop_up_window.withdraw()
 
 
 # Create the window.
@@ -523,6 +562,18 @@ app_font = font.Font(family=font_style.get(), size=10,
 app_title_font = font.Font(family=font_style.get(), size=15, weight='bold',
                            underline=1)
 app_textbox_font = font.Font(size=10)
+app_pop_up_font = font.Font(family=font_style.get(), size=15, weight='bold')
+
+pop_up_window = Toplevel()
+pop_up_window.title('')
+pop_up_window.attributes('-topmost', 1)
+pop_up_window.protocol('WM_DELETE_WINDOW', withdraw_pop_ups)
+pop_up_label = Label(pop_up_window, font=app_pop_up_font, text='')
+pop_up_close_button = Button(pop_up_window, text='OK', command=lambda:
+                            withdraw_pop_ups(), font=app_font)
+pop_up_label.pack(padx=50, pady=(25, 0))
+pop_up_close_button.pack(pady=25)
+pop_up_window.withdraw()
 
 # Create the elements for the configuration_grid frame.
 window_configuration_label = Label(configuration_grid,
