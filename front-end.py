@@ -7,7 +7,7 @@ To run this, use: python3 front-end.py
 
 from tkinter import (Tk, ttk, Canvas, Text, Button, StringVar, Label, Toplevel,
                      BooleanVar, Checkbutton, Frame, font, Scale, colorchooser)
-from tkinter.messagebox import showinfo, askokcancel
+from tkinter.messagebox import showinfo
 from webbrowser import open_new_tab
 
 
@@ -103,32 +103,32 @@ def draw_figure(data_df_array, frame, file_name, save):
         fig.set_figwidth(int(width_value))
         pop_up_window.title('Invalid height')
         pop_up_label.configure(text='The height entered was invalid.\nThe '
-                              + 'height has been reset.')
+                               + 'height has been reset.')
         pop_up_window.geometry('')
         pop_up_window.deiconify()
     elif height_value.isdigit() and width_value != '':
         fig.set_figheight(int(height_value))
         pop_up_window.title('Invalid width')
-        pop_up_label.configure(text='The width entered was invalid.\nThe width '
-                              + 'has been reset.')
+        pop_up_label.configure(text='The width entered was invalid.\nThe width'
+                               + ' has been reset.')
         pop_up_window.geometry('')
         pop_up_window.deiconify()
     elif width_value != '' and height_value != '':
         pop_up_window.title('Invalid dimensions')
         pop_up_label.configure(text='The width and height values entered were '
-                              + 'invalid.\nThe dimensions have been reset.')
+                               + 'invalid.\nThe dimensions have been reset.')
         pop_up_window.geometry('')
         pop_up_window.deiconify()
     elif width_value != '':
         pop_up_window.title('Invalid width')
-        pop_up_label.configure(text='The width entered was invalid.\nThe width '
-                              + 'has been reset.')
+        pop_up_label.configure(text='The width entered was invalid.\nThe width'
+                               + ' has been reset.')
         pop_up_window.geometry('')
         pop_up_window.deiconify()
     elif height_value != '':
         pop_up_window.title('Invalid height')
         pop_up_label.configure(text='The height entered was invalid.\nThe '
-                              + 'height has been reset.')
+                               + 'height has been reset.')
         pop_up_window.geometry('')
         pop_up_window.deiconify()
 
@@ -196,10 +196,10 @@ def draw_figure(data_df_array, frame, file_name, save):
             else:
                 if sanitize_filename(file_name) != '':
                     pop_up_window.title('Invalid file name')
-                    pop_up_label.configure(text='The graph was not saved.\nDid '
-                                          + 'you mean \''
-                                          + sanitize_filename(file_name)
-                                          + '\'?')
+                    pop_up_label.configure(text='The graph was not saved.\nDid'
+                                           + ' you mean \''
+                                           + sanitize_filename(file_name)
+                                           + '\'?')
                     pop_up_window.geometry('')
                     pop_up_window.deiconify()
                 else:
@@ -217,8 +217,7 @@ def draw_figure(data_df_array, frame, file_name, save):
 
 # Ask for confirmation before closing the program.
 def on_closing():
-    if askokcancel('Quit', 'Do you want to quit?'):
-        exit()
+    close_window.deiconify()
 
 
 # Create the DataFrame.
@@ -367,6 +366,9 @@ def choose_bg_colour():
     save_text_box.configure(highlightbackground=chosen_bg_colour[1])
     pop_up_window.configure(bg=chosen_bg_colour[1])
     pop_up_label.configure(bg=chosen_bg_colour[1])
+    close_window.configure(bg=chosen_bg_colour[1])
+    close_buttons_grid.configure(bg=chosen_bg_colour[1])
+    close_label.configure(bg=chosen_bg_colour[1])
 
 
 # Explicitly change the colour of every relevant input element.
@@ -416,6 +418,9 @@ def choose_text_colour():
                     selectforeground=chosen_text_colour[1])
     pop_up_label.configure(fg=chosen_text_colour[1])
     pop_up_close_button.configure(fg=chosen_text_colour[1])
+    close_label.configure(fg=chosen_text_colour[1])
+    close_no_button.configure(fg=chosen_text_colour[1])
+    close_yes_button.configure(fg=chosen_text_colour[1])
 
 
 # Explicitly change the colour of every relevant button element.
@@ -429,6 +434,8 @@ def choose_button_colour():
     entries_button.configure(bg=chosen_button_colour[1])
     save_button.configure(bg=chosen_button_colour[1])
     pop_up_close_button.configure(bg=chosen_button_colour[1])
+    close_no_button.configure(bg=chosen_button_colour[1])
+    close_yes_button.configure(bg=chosen_button_colour[1])
 
 
 # Explicitly change the highlight colour of every relevant element.
@@ -461,10 +468,18 @@ def choose_highlight_colour():
     style.configure('TCombobox', selectbackground=chosen_highlight_colour[1])
     pop_up_close_button.configure(
         highlightbackground=chosen_highlight_colour[1])
+    close_no_button.configure(highlightbackground=chosen_highlight_colour[1])
+    close_yes_button.configure(highlightbackground=chosen_highlight_colour[1])
 
 
+# Hide the pop-up window to allow for it to be used again.
 def withdraw_pop_ups():
     pop_up_window.withdraw()
+    close_window.withdraw()
+
+
+def close_windows():
+    exit()
 
 
 # Create the window.
@@ -564,16 +579,35 @@ app_title_font = font.Font(family=font_style.get(), size=15, weight='bold',
 app_textbox_font = font.Font(size=10)
 app_pop_up_font = font.Font(family=font_style.get(), size=15, weight='bold')
 
+# Create the template for error and information pop-ups.
 pop_up_window = Toplevel()
 pop_up_window.title('')
 pop_up_window.attributes('-topmost', 1)
 pop_up_window.protocol('WM_DELETE_WINDOW', withdraw_pop_ups)
 pop_up_label = Label(pop_up_window, font=app_pop_up_font, text='')
 pop_up_close_button = Button(pop_up_window, text='OK', command=lambda:
-                            withdraw_pop_ups(), font=app_font)
+                             withdraw_pop_ups(), font=app_font)
 pop_up_label.pack(padx=50, pady=(25, 0))
 pop_up_close_button.pack(pady=25)
 pop_up_window.withdraw()
+
+# Create the pop-up for closing the main window.
+close_window = Toplevel()
+close_window.title('Quit')
+close_window.attributes('-topmost', 1)
+close_window.protocol('WM_DELETE_WINDOW', withdraw_pop_ups)
+close_label = Label(close_window, font=app_pop_up_font,
+                    text='Do you want to quit?')
+close_buttons_grid = Frame(close_window)
+close_no_button = Button(close_buttons_grid, text='No', command=lambda:
+                         withdraw_pop_ups(), font=app_font, padx=15)
+close_yes_button = Button(close_buttons_grid, text='Yes', command=lambda:
+                          close_windows(), font=app_font)
+close_label.pack(padx=50, pady=(25, 15))
+close_buttons_grid.pack(pady=(0, 25))
+close_no_button.grid(row=0, column=0, padx=10)
+close_yes_button.grid(row=0, column=1)
+close_window.withdraw()
 
 # Create the elements for the configuration_grid frame.
 window_configuration_label = Label(configuration_grid,
