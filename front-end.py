@@ -5,6 +5,62 @@ on a graph.
 To run this, use: python3 front-end.py
 '''
 
+from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
+                     Button, Checkbutton, Text, font, Scale, colorchooser)
+from tkinter.messagebox import showinfo, showerror, askokcancel
+from webbrowser import open_new_tab
+
+
+# Open a URL.
+def open_url(URL):
+    open_new_tab(URL)
+
+
+# Copy the command to run the back-end to the clipboard.
+def copy_command(root):
+    root.clipboard_append('python3 back-end.py')
+    showinfo(title='Command copied', message='The command has been copied to '
+             + 'your clipboard.')
+
+
+# Create a welcome message window.
+welcome_window = Tk()
+welcome_window.title('Welcome')
+welcome_font = font.Font(size=15)
+
+label = Label(welcome_window, font=welcome_font, text='This application takes '
+              + 'the activity data of Mastodon instances and displays it on '
+              + 'a graph.\n\nIf you have not collected any activity data, you '
+              + 'can do this using:')
+command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
+                + 'back-end.py')
+label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
+                + 'including how to install the required Python packages, can '
+                + 'be found at:')
+link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
+             + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
+label_3 = Label(welcome_window, font=welcome_font, text='')
+close_button = Button(welcome_window, text='Close', command=lambda:
+                      welcome_window.destroy(), font=welcome_font)
+label.pack()
+command.pack()
+label_2.pack()
+link.pack()
+label_3.pack()
+close_button.pack()
+
+# Set the initial window size.
+welcome_window.geometry('1050x300')
+
+# Call the copy_command function when the command text is clicked.
+command.bind("<Button-1>", lambda e: copy_command(welcome_window))
+
+# Call the open_url function when the URL text is clicked.
+link.bind("<Button-1>", lambda e: open_url('https://github.com/Ubaydullah-A/'
+          + 'Charting-Mastodon-Activity'))
+
+welcome_window.mainloop()
+
 try:
     import numpy
     from pickle import load
@@ -15,9 +71,6 @@ try:
     from datetime import datetime
     from time import mktime, strptime
     from tkcalendar import DateEntry
-    from tkinter import (Tk, ttk, Canvas, Frame, BooleanVar, StringVar, Label,
-                         Button, Checkbutton, Text, font, Scale, colorchooser)
-    from tkinter.messagebox import showinfo, showerror, askokcancel
     from os import listdir, mkdir, path
     from pathvalidate import is_valid_filename, sanitize_filename
 except Exception:
@@ -237,13 +290,14 @@ def font_size_changed(event):
 
 # Explicitly change the background colour of every relevant element.
 def choose_bg_colour():
-    chosen_bg_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_bg_colour = colorchooser.askcolor(title='Choose background colour')
     root.configure(bg=chosen_bg_colour[1])
     canvas.configure(bg=chosen_bg_colour[1])
     frame.configure(bg=chosen_bg_colour[1])
     input_grid.configure(bg=chosen_bg_colour[1])
     configuration_grid.configure(bg=chosen_bg_colour[1])
     dates_grid.configure(bg=chosen_bg_colour[1])
+    checkbox_grid.configure(bg=chosen_bg_colour[1])
     window_configuration_label.configure(bg=chosen_bg_colour[1])
     change_font_label.configure(bg=chosen_bg_colour[1])
     change_font_size_label.configure(bg=chosen_bg_colour[1])
@@ -287,7 +341,7 @@ def choose_bg_colour():
 
 # Explicitly change the colour of every relevant input element.
 def choose_input_colour():
-    chosen_input_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_input_colour = colorchooser.askcolor(title='Choose input colour')
     style.configure('TCombobox', background=chosen_input_colour[1])
     font_size_scale.configure(troughcolor=chosen_input_colour[1])
     style.configure('DateEntry', fieldbackground=chosen_input_colour[1],
@@ -299,7 +353,7 @@ def choose_input_colour():
 
 # Explicitly change the colour of every relevant text element.
 def choose_text_colour():
-    chosen_text_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_text_colour = colorchooser.askcolor(title='Choose text colour')
     window_configuration_label.configure(fg=chosen_text_colour[1])
     change_font_label.configure(fg=chosen_text_colour[1])
     change_font_size_label.configure(fg=chosen_text_colour[1])
@@ -314,21 +368,27 @@ def choose_text_colour():
     entries_label.configure(fg=chosen_text_colour[1])
     entries_button.configure(fg=chosen_text_colour[1])
     save_label.configure(fg=chosen_text_colour[1])
-    save_text_box.configure(fg=chosen_text_colour[1])
+    save_text_box.configure(fg=chosen_text_colour[1],
+                            selectforeground=chosen_text_colour[1])
     save_button.configure(fg=chosen_text_colour[1])
     statuses_checkbox.configure(fg=chosen_text_colour[1])
     logins_checkbox.configure(fg=chosen_text_colour[1])
     registrations_checkbox.configure(fg=chosen_text_colour[1])
     width_label.configure(fg=chosen_text_colour[1])
-    width_text_box.configure(fg=chosen_text_colour[1])
+    width_text_box.configure(fg=chosen_text_colour[1],
+                             selectforeground=chosen_text_colour[1])
     height_label.configure(fg=chosen_text_colour[1])
-    height_text_box.configure(fg=chosen_text_colour[1])
-    style.configure('DateEntry', foreground=chosen_text_colour[1])
+    height_text_box.configure(fg=chosen_text_colour[1],
+                              selectforeground=chosen_text_colour[1])
+    style.configure('DateEntry', foreground=chosen_text_colour[1],
+                    selectforeground=chosen_text_colour[1])
+    style.configure('TCombobox', foreground=chosen_text_colour[1],
+                    selectforeground=chosen_text_colour[1])
 
 
 # Explicitly change the colour of every relevant button element.
 def choose_button_colour():
-    chosen_button_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_button_colour = colorchooser.askcolor(title='Choose button colour')
     text_colour_button.configure(bg=chosen_button_colour[1])
     bg_colour_button.configure(bg=chosen_button_colour[1])
     input_colour_button.configure(bg=chosen_button_colour[1])
@@ -340,7 +400,8 @@ def choose_button_colour():
 
 # Explicitly change the highlight colour of every relevant element.
 def choose_highlight_colour():
-    chosen_highlight_colour = colorchooser.askcolor(title='Choose colour.')
+    chosen_highlight_colour = colorchooser.askcolor(title='Choose highlight '
+                                                    + 'colour')
     text_colour_button.configure(
         highlightbackground=chosen_highlight_colour[1])
     bg_colour_button.configure(highlightbackground=chosen_highlight_colour[1])
@@ -353,10 +414,18 @@ def choose_highlight_colour():
     entries_button.configure(highlightbackground=chosen_highlight_colour[1])
     save_button.configure(highlightbackground=chosen_highlight_colour[1])
     separator.configure(bg=chosen_highlight_colour[1])
+    save_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                            insertbackground=chosen_highlight_colour[1])
+    width_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                             insertbackground=chosen_highlight_colour[1])
+    height_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                              insertbackground=chosen_highlight_colour[1])
     style.configure('Vertical.TScrollbar',
                     background=chosen_highlight_colour[1])
     style.configure('Horizontal.TScrollbar',
                     background=chosen_highlight_colour[1])
+    style.configure('DateEntry', selectbackground=chosen_highlight_colour[1])
+    style.configure('TCombobox', selectbackground=chosen_highlight_colour[1])
 
 
 # Create the window.
@@ -442,6 +511,7 @@ configuration_grid.grid(row=1, column=1, rowspan=5, sticky='ns')
 font_options = []
 for x in font.families():
     font_options.append(x)
+font_options = list(dict.fromkeys(font_options))
 font_options.sort()
 
 # Set the default font.
