@@ -7,7 +7,6 @@ To run this, use: python3 front-end.py
 
 from tkinter import (Tk, ttk, Canvas, Text, Button, StringVar, Label, Toplevel,
                      BooleanVar, Checkbutton, Frame, font, Scale, colorchooser)
-from tkinter.messagebox import showinfo
 from webbrowser import open_new_tab
 
 
@@ -16,11 +15,19 @@ def open_url(URL):
     open_new_tab(URL)
 
 
+# Hide the pop-up window to allow for it to be used again.
+def withdraw_copy_pop_up():
+    copy_pop_up.withdraw()
+
+
 # Copy the command to run the back-end to the clipboard.
 def copy_command(root):
     root.clipboard_append('python3 back-end.py')
-    showinfo(title='Command copied', message='The command has been copied to '
-             + 'your clipboard.')
+    copy_pop_up.title('Command copied')
+    copy_pop_up_label.configure(text='The command has been copied to your '
+                                + 'clipboard.')
+    copy_pop_up.geometry('')
+    copy_pop_up.deiconify()
 
 
 # Create a welcome message window.
@@ -28,6 +35,19 @@ welcome_window = Tk()
 welcome_window.title('Welcome')
 welcome_font = font.Font(size=15)
 
+# Create the pop-up for when the command is copied.
+copy_pop_up = Toplevel()
+copy_pop_up.title('')
+copy_pop_up.attributes('-topmost', 1)
+copy_pop_up.protocol('WM_DELETE_WINDOW', withdraw_copy_pop_up)
+copy_pop_up_label = Label(copy_pop_up, font=welcome_font, text='')
+copy_pop_up_close_button = Button(copy_pop_up, text='OK', command=lambda:
+                                  withdraw_copy_pop_up(), font=welcome_font)
+copy_pop_up_label.pack(padx=50, pady=(25, 0))
+copy_pop_up_close_button.pack(pady=25)
+copy_pop_up.withdraw()
+
+# Create the elements for the welcome window.
 label = Label(welcome_window, font=welcome_font, text='This application takes '
               + 'the activity data of Mastodon instances and displays it on '
               + 'a graph.\n\nIf you have not collected any activity data, you '
@@ -472,7 +492,7 @@ def choose_highlight_colour():
     close_yes_button.configure(highlightbackground=chosen_highlight_colour[1])
 
 
-# Hide the pop-up window to allow for it to be used again.
+# Hide the pop-up windows to allow for them to be used again.
 def withdraw_pop_ups():
     pop_up_window.withdraw()
     close_window.withdraw()
