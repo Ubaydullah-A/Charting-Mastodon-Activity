@@ -414,9 +414,12 @@ def choose_highlight_colour():
     entries_button.configure(highlightbackground=chosen_highlight_colour[1])
     save_button.configure(highlightbackground=chosen_highlight_colour[1])
     separator.configure(bg=chosen_highlight_colour[1])
-    save_text_box.configure(selectbackground=chosen_highlight_colour[1])
-    width_text_box.configure(selectbackground=chosen_highlight_colour[1])
-    height_text_box.configure(selectbackground=chosen_highlight_colour[1])
+    save_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                            insertbackground=chosen_highlight_colour[1])
+    width_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                             insertbackground=chosen_highlight_colour[1])
+    height_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                              insertbackground=chosen_highlight_colour[1])
     style.configure('Vertical.TScrollbar',
                     background=chosen_highlight_colour[1])
     style.configure('Horizontal.TScrollbar',
