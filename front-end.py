@@ -479,6 +479,7 @@ def choose_bg_colour():
     empty_row_8.configure(bg=chosen_bg_colour[1])
     empty_row_9.configure(bg=chosen_bg_colour[1])
     empty_row_10.configure(bg=chosen_bg_colour[1])
+    empty_row_11.configure(bg=chosen_bg_colour[1])
     empty_column_1.configure(bg=chosen_bg_colour[1])
     empty_column_2.configure(bg=chosen_bg_colour[1])
     empty_column_3.configure(bg=chosen_bg_colour[1])
@@ -500,7 +501,6 @@ def choose_bg_colour():
     ai_analysis_window.configure(bg=chosen_bg_colour[1])
     ai_label.configure(bg=chosen_bg_colour[1])
     ai_text_box.configure(highlightbackground=chosen_bg_colour[1])
-    ai_analysis_grid.configure(bg=chosen_bg_colour[1])
     server_address_label.configure(bg=chosen_bg_colour[1])
     server_address_text_box.configure(highlightbackground=chosen_bg_colour[1])
     max_tokens_label.configure(bg=chosen_bg_colour[1])
@@ -843,7 +843,7 @@ font_chosen = StringVar()
 font_combobox = ttk.Combobox(configuration_grid, width=30, state='readonly',
                              textvariable=font_chosen, font=app_textbox_font)
 font_combobox['values'] = font_options
-font_combobox.grid(row=2, column=0)
+font_combobox.grid(row=2, column=0, sticky='ew')
 
 change_font_size_label = Label(configuration_grid,
                                text='Select font size:', anchor='w',
@@ -898,40 +898,41 @@ highlight_colour_button.grid(row=14, column=0, sticky='ew')
 empty_row_6 = Label(configuration_grid, text='')
 empty_row_6.grid(row=15, column=0)
 
-ai_analysis_grid = Frame(configuration_grid)
-ai_analysis_grid.grid(row=16, column=0, columnspan=2, sticky='ew')
-server_address_label = Label(ai_analysis_grid, text='Enter server address for '
-                             + 'the AI model: ', wraplength=400, font=app_font)
-server_address_text_box = Text(ai_analysis_grid, height=1, width=30,
+server_address_label = Label(configuration_grid, text='Enter server address '
+                             + 'for the AI model: ', wraplength=400,
+                             font=app_font)
+server_address_text_box = Text(configuration_grid, height=1, width=30,
                                font=app_textbox_font)
-model_label = Label(ai_analysis_grid, text='Enter the model\'s API identifier'
-                    + ': ', wraplength=400, font=app_font)
-model_text_box = Text(ai_analysis_grid, height=1, width=30,
+model_label = Label(configuration_grid, text='Enter the model\'s API '
+                    + 'identifier: ', wraplength=400, font=app_font)
+model_text_box = Text(configuration_grid, height=1, width=30,
                       font=app_textbox_font)
-max_tokens_label = Label(ai_analysis_grid, text='Enter the maximum number of '
-                         + 'tokens: ', wraplength=400, font=app_font)
-max_tokens_text_box = Text(ai_analysis_grid, height=1, width=30,
+max_tokens_label = Label(configuration_grid, text='Enter the maximum number of'
+                         + ' tokens: ', wraplength=400, font=app_font)
+max_tokens_text_box = Text(configuration_grid, height=1, width=30,
                            font=app_textbox_font)
-temperature_label = Label(ai_analysis_grid, text='Enter the temperature value'
-                          + ': ', wraplength=400, font=app_font)
-temperature_text_box = Text(ai_analysis_grid, height=1, width=30,
+temperature_label = Label(configuration_grid, text='Enter the temperature '
+                          + 'value: ', wraplength=400, font=app_font)
+temperature_text_box = Text(configuration_grid, height=1, width=30,
                             font=app_textbox_font)
-ai_analysis_button = Button(ai_analysis_grid, text='Generate AI analysis\n('
+ai_analysis_button = Button(configuration_grid, text='Generate AI analysis\n('
                             + 'window will\nbe temporarily\nunresponsive)',
                             command=lambda:
                                 get_inputs(data, frame, False, True),
                                 font=app_font, height=4)
-empty_row_7 = Label(ai_analysis_grid, text='')
-server_address_label.grid(row=0, column=0, sticky='ew')
-server_address_text_box.grid(row=1, column=0, sticky='ew')
-model_label.grid(row=2, column=0, sticky='ew')
-model_text_box.grid(row=3, column=0, sticky='ew')
-max_tokens_label.grid(row=4, column=0, sticky='ew')
-max_tokens_text_box.grid(row=5, column=0, sticky='ew')
-temperature_label.grid(row=6, column=0, sticky='ew')
-temperature_text_box.grid(row=7, column=0, sticky='ew')
-empty_row_7.grid(row=8, column=0)
-ai_analysis_button.grid(row=9, column=0, sticky='ew')
+empty_row_7 = Label(configuration_grid, text='')
+empty_row_8 = Label(configuration_grid, text='')
+server_address_label.grid(row=16, column=0, sticky='ew')
+server_address_text_box.grid(row=17, column=0, sticky='ew')
+model_label.grid(row=18, column=0, sticky='ew')
+model_text_box.grid(row=19, column=0, sticky='ew')
+max_tokens_label.grid(row=20, column=0, sticky='ew')
+max_tokens_text_box.grid(row=21, column=0, sticky='ew')
+temperature_label.grid(row=22, column=0, sticky='ew')
+temperature_text_box.grid(row=23, column=0, sticky='ew')
+empty_row_7.grid(row=24, column=0)
+ai_analysis_button.grid(row=25, column=0, sticky='ew')
+empty_row_8.grid(row=26, column=0)
 
 # Add padding around the frames and the separator.
 empty_column_1 = Label(frame, text='', width=2)
@@ -946,14 +947,14 @@ empty_column_3.grid(row=1, column=4)
 empty_column_4 = Label(frame, text='', width=2)
 empty_column_4.grid(row=1, column=6)
 
-empty_row_8 = Label(frame, text='')
-empty_row_8.grid(row=0, column=0, columnspan=6)
-
 empty_row_9 = Label(frame, text='')
-empty_row_9.grid(row=3, column=5)
+empty_row_9.grid(row=0, column=0, columnspan=6)
 
 empty_row_10 = Label(frame, text='')
-empty_row_10.grid(row=5, column=5)
+empty_row_10.grid(row=3, column=5)
+
+empty_row_11 = Label(frame, text='')
+empty_row_11.grid(row=5, column=5)
 
 # Create a separator between the configuration_grid frame and the input_grid
 # frame.
