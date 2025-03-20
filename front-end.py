@@ -1,6 +1,7 @@
 '''
-This program takes the activity data collected by the back-end and displays it
-on a graph.
+The front-end takes the activity data collected by the back-end and displays it
+on a graph. When connected to a local LLM, it can also provide an AI analysis
+of the displayed data.
 
 To run this, use: python3 front-end.py
 '''
@@ -51,8 +52,9 @@ copy_pop_up.withdraw()
 # Create the elements for the welcome window.
 label = Label(welcome_window, font=welcome_font, text='This application takes '
               + 'the activity data of Mastodon instances and displays it on '
-              + 'a graph.\n\nIf you have not collected any activity data, you '
-              + 'can do this using:')
+              + 'a graph.\nWhen connected to a local LLM, it can also provide '
+              + 'an AI analysis of the displayed data.\n\nIf you have not '
+              + 'collected any activity data, you can do this using:')
 command = Label(welcome_window, fg='blue', font=welcome_font, text='python3 '
                 + 'back-end.py')
 label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
@@ -71,7 +73,7 @@ label_3.pack()
 close_button.pack()
 
 # Set the initial window size.
-welcome_window.geometry('1050x300')
+welcome_window.geometry('1050x350')
 
 # Call the copy_command function when the command text is clicked.
 command.bind('<Button-1>', lambda e: copy_command(welcome_window))
