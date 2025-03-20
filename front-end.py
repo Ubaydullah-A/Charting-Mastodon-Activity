@@ -435,6 +435,10 @@ def font_size_changed(event):
     save_text_box.configure(width=app_width_3)
     font_combobox.configure(width=app_width_4)
     bg_colour_button.configure(width=app_width_4)
+    server_address_text_box.configure(width=app_width_4)
+    model_text_box.configure(width=app_width_4)
+    max_tokens_text_box.configure(width=app_width_4)
+    temperature_text_box.configure(width=app_width_4)
 
 
 # Explicitly change the background colour of every relevant element.
