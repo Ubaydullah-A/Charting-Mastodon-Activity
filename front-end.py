@@ -291,74 +291,87 @@ def get_inputs(data, frame, save, ai_response):
         model_text = model_text_box.get('1.0', 'end-1c')
         max_tokens_text = max_tokens_text_box.get('1.0', 'end-1c')
         temperature_text = temperature_text_box.get('1.0', 'end-1c')
-        response = get(f'{server_address_text}/v1/models')
-        if response.status_code == 200:
-            if model_text != '':
-                if max_tokens_text != '' and max_tokens_text.isdigit():
-                    if temperature_text != '':
-                        try:
-                            float(temperature_text)
-                            valid_ai_inputs = True
-                        except ValueError:
+        try:
+            response = get(f'{server_address_text}/v1/models')
+            if response.status_code == 200:
+                if model_text != '':
+                    if max_tokens_text != '' and max_tokens_text.isdigit():
+                        if temperature_text != '':
+                            try:
+                                float(temperature_text)
+                                valid_ai_inputs = True
+                            except ValueError:
+                                pop_up_window.title('Invalid temperature')
+                                pop_up_label.configure(text='Please enter a '
+                                                       + 'valid temperature '
+                                                       + 'value.')
+                                pop_up_window.geometry('')
+                                pop_up_window.deiconify()
+                                valid_ai_inputs = False
+                        else:
                             pop_up_window.title('Invalid temperature')
                             pop_up_label.configure(text='Please enter a valid '
                                                    + 'temperature value.')
                             pop_up_window.geometry('')
                             pop_up_window.deiconify()
-                            valid_ai_inputs = False
                     else:
-                        pop_up_window.title('Invalid temperature')
+                        pop_up_window.title('Invalid token maximum')
                         pop_up_label.configure(text='Please enter a valid '
-                                               + 'temperature value.')
+                                               + 'value for the maximum number'
+                                               + ' of tokens.')
                         pop_up_window.geometry('')
                         pop_up_window.deiconify()
                 else:
-                    pop_up_window.title('Invalid token maximum')
-                    pop_up_label.configure(text='Please enter a valid value '
-                                           + 'for the maximum number of tokens'
-                                           + '.')
+                    pop_up_window.title('Invalid model')
+                    pop_up_label.configure(text='Please enter a valid API '
+                                           + 'identifier for the model.')
                     pop_up_window.geometry('')
                     pop_up_window.deiconify()
             else:
-                pop_up_window.title('Invalid model')
-                pop_up_label.configure(text='Please enter a model\'s API '
-                                       + 'identifier.')
+                pop_up_window.title('Invalid response')
+                pop_up_label.configure(text='Unable to get an OK response from'
+                                       + ' the LLM.')
                 pop_up_window.geometry('')
                 pop_up_window.deiconify()
-        else:
-            pop_up_window.title('Invalid server address')
-            pop_up_label.configure(text='Unable to connect to server address.')
+            if valid_ai_inputs:
+                # Create the array that will provide the data to the LLM.
+                for index in range(len(data_df_array)):
+                    for week in range(len(data_df_array[index][1]['week'])):
+                        instance = data_df_array[index][0]
+                        temp.append('Instance:' + data_df_array[index][0])
+                        week_date = datetime.fromtimestamp(
+                            float(data_df_array[index][1]['week'][week]))\
+                            .strftime('%d/%m/%y')
+                        temp.append('Date:' + week_date)
+                        if show_statuses.get():
+                            statuses = \
+                                (int(data_df_array[index][1]['statuses'][week])
+                                 / int(data_df_array[index][1]['count'][week]))
+                            temp.append('statuses:' + str(statuses))
+                        if show_logins.get():
+                            logins = \
+                                (int(data_df_array[index][1]['logins'][week])
+                                 / int(data_df_array[index][1]['count'][week]))
+                            temp.append('logins:' + str(logins))
+                        if show_registrations.get():
+                            registrations = (int(
+                                    data_df_array[index][1]
+                                    ['registrations'][week])
+                                    / int(data_df_array[index][1]
+                                          ['count'][week]))
+                            temp.append('registrations:' + str(registrations))
+                        llm_input.append(temp)
+                        temp = []
+                get_ai_response(llm_input, max_tokens_text, model_text,
+                                temperature_text, server_address_text)
+        except Exception:
+            pop_up_window.title('Unable to connect to LLM')
+            pop_up_label.configure(text='An error occurred when trying to '
+                                   + 'connect to the LLM.\nPlease check that '
+                                   + 'the LLM is set up correctly and that the'
+                                   + ' server address provided is correct.')
             pop_up_window.geometry('')
             pop_up_window.deiconify()
-        if valid_ai_inputs:
-            # Create the array that will provide the data to the LLM.
-            for index in range(len(data_df_array)):
-                for week in range(len(data_df_array[index][1]['week'])):
-                    instance = data_df_array[index][0]
-                    temp.append('Instance:' + data_df_array[index][0])
-                    week_date = datetime.fromtimestamp(
-                        float(data_df_array[index][1]['week'][week]))\
-                        .strftime('%d/%m/%y')
-                    temp.append('Date:' + week_date)
-                    if show_statuses.get():
-                        statuses = \
-                            (int(data_df_array[index][1]['statuses'][week])
-                             / int(data_df_array[index][1]['count'][week]))
-                        temp.append('statuses:' + str(statuses))
-                    if show_logins.get():
-                        logins = \
-                            (int(data_df_array[index][1]['logins'][week])
-                             / int(data_df_array[index][1]['count'][week]))
-                        temp.append('logins:' + str(logins))
-                    if show_registrations.get():
-                        registrations = (int(
-                                data_df_array[index][1]['registrations'][week])
-                                / int(data_df_array[index][1]['count'][week]))
-                        temp.append('registrations:' + str(registrations))
-                    llm_input.append(temp)
-                    temp = []
-            get_ai_response(llm_input, max_tokens_text, model_text,
-                            temperature_text, server_address_text)
 
     draw_figure(data_df_array, frame, file_name, save)
 
@@ -651,6 +664,7 @@ def get_ai_response(llm_input, max_tokens, model, temperature, server_address):
     }
 
     # Send the request
+    ai_analysis_window.iconify()
     response = post(f'{server_address}/v1/completions', json=payload)
 
     if response.status_code == 200:
@@ -663,8 +677,8 @@ def get_ai_response(llm_input, max_tokens, model, temperature, server_address):
     else:
         ai_text_box.configure(state='normal')
         ai_text_box.delete('0.0', 'end')
-        ai_text_box.insert(1.0,
-                           f'Error: {response.status_code} - {response.text}')
+        ai_text_box.insert(1.0, 'Error: ' + str(response.status_code) + ' - '
+                           + response.text)
         ai_text_box.configure(state='disabled')
     ai_analysis_window.deiconify()
 
