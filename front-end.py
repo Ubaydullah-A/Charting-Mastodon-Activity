@@ -575,15 +575,20 @@ def choose_text_colour():
     close_no_button.configure(fg=chosen_text_colour[1])
     close_yes_button.configure(fg=chosen_text_colour[1])
     ai_label.configure(fg=chosen_text_colour[1])
-    ai_text_box.configure(fg=chosen_text_colour[1])
+    ai_text_box.configure(fg=chosen_text_colour[1],
+                          selectforeground=chosen_text_colour[1])
     server_address_label.configure(fg=chosen_text_colour[1])
-    server_address_text_box.configure(fg=chosen_text_colour[1])
+    server_address_text_box.configure(fg=chosen_text_colour[1],
+                                      selectforeground=chosen_text_colour[1])
     max_tokens_label.configure(fg=chosen_text_colour[1])
-    max_tokens_text_box.configure(fg=chosen_text_colour[1])
+    max_tokens_text_box.configure(fg=chosen_text_colour[1],
+                                  selectforeground=chosen_text_colour[1])
     model_label.configure(fg=chosen_text_colour[1])
-    model_text_box.configure(fg=chosen_text_colour[1])
+    model_text_box.configure(fg=chosen_text_colour[1],
+                             selectforeground=chosen_text_colour[1])
     temperature_label.configure(fg=chosen_text_colour[1])
-    temperature_text_box.configure(fg=chosen_text_colour[1])
+    temperature_text_box.configure(fg=chosen_text_colour[1],
+                                   selectforeground=chosen_text_colour[1])
     ai_analysis_button.configure(fg=chosen_text_colour[1])
 
 
