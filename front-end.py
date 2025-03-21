@@ -210,12 +210,20 @@ def draw_figure(data_df_array, frame, file_name, save):
             mkdir('graphs')
         if file_name != '':
             if (is_valid_filename(file_name)):
-                fig.savefig('./graphs/' + file_name)
-                pop_up_window.title('Graph saved')
-                pop_up_label.configure(text='Graph saved as \'' + file_name
-                                       + '\'.')
-                pop_up_window.geometry('')
-                pop_up_window.deiconify()
+                try:
+                    fig.savefig('./graphs/' + file_name)
+                    pop_up_window.title('Graph saved')
+                    pop_up_label.configure(text='Graph saved as \'' + file_name
+                                           + '\'.')
+                    pop_up_window.geometry('')
+                    pop_up_window.deiconify()
+                except ValueError:
+                    pop_up_window.title('Invalid format')
+                    pop_up_label.configure(text='The format entered is not '
+                                           + 'supported.\nThe graph was not '
+                                           + 'saved.')
+                    pop_up_window.geometry('')
+                    pop_up_window.deiconify()
             else:
                 if sanitize_filename(file_name) != '':
                     pop_up_window.title('Invalid file name')
