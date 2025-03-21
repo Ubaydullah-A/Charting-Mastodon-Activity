@@ -387,8 +387,8 @@ def get_inputs(data, frame, save, ai_response):
             pop_up_window.title('Unable to connect to LLM')
             pop_up_label.configure(text='An error occurred when trying to '
                                    + 'connect to the LLM.\nPlease check that '
-                                   + 'the LLM is set up correctly and that the'
-                                   + ' server address provided is correct.')
+                                   + 'the LLM is set up correctly\nand that '
+                                   + 'the server address provided is correct.')
             pop_up_window.geometry('')
             pop_up_window.deiconify()
 
