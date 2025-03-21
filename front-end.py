@@ -115,127 +115,146 @@ def draw_figure(data_df_array, frame, file_name, save):
     width_value = width_text_box.get('1.0', 'end-1c').strip()
     height_value = height_text_box.get('1.0', 'end-1c').strip()
 
-    if width_value.isdigit() and height_value.isdigit():
-        fig.set_figwidth(int(width_value))
-        fig.set_figheight(int(height_value))
-    elif width_value.isdigit() and height_value == '':
-        fig.set_figwidth(int(width_value))
-    elif height_value.isdigit() and width_value == '':
-        fig.set_figheight(int(height_value))
-    elif width_value.isdigit() and height_value != '':
-        fig.set_figwidth(int(width_value))
-        pop_up_window.title('Invalid height')
-        pop_up_label.configure(text='The height entered was invalid.\nThe '
-                               + 'height has been reset.')
-        pop_up_window.geometry('')
-        pop_up_window.deiconify()
-    elif height_value.isdigit() and width_value != '':
-        fig.set_figheight(int(height_value))
-        pop_up_window.title('Invalid width')
-        pop_up_label.configure(text='The width entered was invalid.\nThe width'
-                               + ' has been reset.')
-        pop_up_window.geometry('')
-        pop_up_window.deiconify()
-    elif width_value != '' and height_value != '':
-        pop_up_window.title('Invalid dimensions')
-        pop_up_label.configure(text='The width and height values entered were '
-                               + 'invalid.\nThe dimensions have been reset.')
-        pop_up_window.geometry('')
-        pop_up_window.deiconify()
-    elif width_value != '':
-        pop_up_window.title('Invalid width')
-        pop_up_label.configure(text='The width entered was invalid.\nThe width'
-                               + ' has been reset.')
-        pop_up_window.geometry('')
-        pop_up_window.deiconify()
-    elif height_value != '':
-        pop_up_window.title('Invalid height')
-        pop_up_label.configure(text='The height entered was invalid.\nThe '
-                               + 'height has been reset.')
-        pop_up_window.geometry('')
-        pop_up_window.deiconify()
-
-    # Plot the data on the graph.
-    for index in range(len(data_df_array)):
-        for i in range(len(selected_instances)):
-            if (selected_instances[i][0] == data_df_array[index][0] and
-                    selected_instances[i][1] == 1):
-                if show_statuses.get():
-                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['statuses'].to_numpy()
-                            .astype(int) / data_df_array[index][1]['count']
-                            .to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' statuses',
-                            marker='x')
-                if show_logins.get():
-                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['logins'].to_numpy()
-                            .astype(int) / data_df_array[index][1]['count']
-                            .to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' logins',
-                            marker='x')
-                if show_registrations.get():
-                    ax.plot(data_df_array[index][1]['week'].to_numpy(),
-                            data_df_array[index][1]['registrations'].to_numpy()
-                            .astype(int) / data_df_array[index][1]['count']
-                            .to_numpy().astype(int),
-                            label=data_df_array[index][0] + ' registrations',
-                            marker='x')
-                break
-
-    # Create a graph legend.
-    if show_statuses.get() or show_logins.get() or show_registrations.get():
-        for i in range(len(selected_instances)):
-            if selected_instances[i][1] == 1:
-                ax.legend(loc='best')
-                break
-
-    # Draw the graph to get the x-axis labels.
-    figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
-    figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
-
-    # Replace the x-axis labels with dates rather than Unix timestamps.
-    old_labels = [item.get_position() for item in ax.get_xticklabels()]
-    labels = old_labels.copy()
-    for label in range(0, len(labels)):
-        labels[label] = datetime.fromtimestamp(
-                float(labels[label][0])).strftime('%d/%m/%y, %H:%M')
-    for x in range(0, len(old_labels)):
-        old_labels[x] = float(old_labels[x][0])
-    ax.set_xticks(old_labels)
-    ax.set_xticklabels(labels, rotation=15)
-    if save:
-        if not path.exists('./graphs/'):
-            mkdir('graphs')
-        if file_name != '':
-            if (is_valid_filename(file_name)):
-                fig.savefig('./graphs/' + file_name)
-                pop_up_window.title('Graph saved')
-                pop_up_label.configure(text='Graph saved as \'' + file_name
-                                       + '\'.')
-                pop_up_window.geometry('')
-                pop_up_window.deiconify()
-            else:
-                if sanitize_filename(file_name) != '':
-                    pop_up_window.title('Invalid file name')
-                    pop_up_label.configure(text='The graph was not saved.\nDid'
-                                           + ' you mean \''
-                                           + sanitize_filename(file_name)
-                                           + '\'?')
-                    pop_up_window.geometry('')
-                    pop_up_window.deiconify()
-                else:
-                    pop_up_window.title('Invalid file name')
-                    pop_up_label.configure(text='The graph was not saved.')
-                    pop_up_window.geometry('')
-                    pop_up_window.deiconify()
-        else:
-            fig.savefig('./graphs/graph')
-            pop_up_window.title('Graph saved')
-            pop_up_label.configure(text='Graph saved as \'graph\'.')
+    try:
+        if width_value.isdigit() and height_value.isdigit():
+            fig.set_figwidth(int(width_value))
+            fig.set_figheight(int(height_value))
+        elif width_value.isdigit() and height_value == '':
+            fig.set_figwidth(int(width_value))
+        elif height_value.isdigit() and width_value == '':
+            fig.set_figheight(int(height_value))
+        elif width_value.isdigit() and height_value != '':
+            fig.set_figwidth(int(width_value))
+            pop_up_window.title('Invalid height')
+            pop_up_label.configure(text='The height entered was invalid.\nThe '
+                                   + 'height has been reset.')
             pop_up_window.geometry('')
             pop_up_window.deiconify()
+        elif height_value.isdigit() and width_value != '':
+            fig.set_figheight(int(height_value))
+            pop_up_window.title('Invalid width')
+            pop_up_label.configure(text='The width entered was invalid.\nThe '
+                                   + 'width has been reset.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
+        elif width_value != '' and height_value != '':
+            pop_up_window.title('Invalid dimensions')
+            pop_up_label.configure(text='The width and height values entered '
+                                   + 'were invalid.\nThe dimensions have been '
+                                   + 'reset.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
+        elif width_value != '':
+            pop_up_window.title('Invalid width')
+            pop_up_label.configure(text='The width entered was invalid.\nThe '
+                                   + 'width has been reset.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
+        elif height_value != '':
+            pop_up_window.title('Invalid height')
+            pop_up_label.configure(text='The height entered was invalid.\nThe '
+                                   + 'height has been reset.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
+
+        # Plot the data on the graph.
+        for index in range(len(data_df_array)):
+            for i in range(len(selected_instances)):
+                if (selected_instances[i][0] == data_df_array[index][0] and
+                        selected_instances[i][1] == 1):
+                    if show_statuses.get():
+                        ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                                data_df_array[index][1]['statuses'].to_numpy()
+                                .astype(int) / data_df_array[index][1]['count']
+                                .to_numpy().astype(int),
+                                label=data_df_array[index][0] + ' statuses',
+                                marker='x')
+                    if show_logins.get():
+                        ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                                data_df_array[index][1]['logins'].to_numpy()
+                                .astype(int) / data_df_array[index][1]['count']
+                                .to_numpy().astype(int),
+                                label=data_df_array[index][0] + ' logins',
+                                marker='x')
+                    if show_registrations.get():
+                        ax.plot(data_df_array[index][1]['week'].to_numpy(),
+                                data_df_array[index][1]['registrations']
+                                .to_numpy().astype(int)
+                                / data_df_array[index][1]['count']
+                                .to_numpy().astype(int),
+                                label=(data_df_array[index][0]
+                                       + ' registrations'), marker='x')
+                    break
+
+        # Create a graph legend.
+        if (show_statuses.get() or show_logins.get()
+                or show_registrations.get()):
+            for i in range(len(selected_instances)):
+                if selected_instances[i][1] == 1:
+                    ax.legend(loc='best')
+                    break
+
+        # Draw the graph to get the x-axis labels.
+        figure_canvas_agg = FigureCanvasTkAgg(fig, frame)
+        figure_canvas_agg.draw()
+        figure_canvas_agg.get_tk_widget().grid(row=4, column=5)
+
+        # Replace the x-axis labels with dates rather than Unix timestamps.
+        old_labels = [item.get_position() for item in ax.get_xticklabels()]
+        labels = old_labels.copy()
+        for label in range(0, len(labels)):
+            labels[label] = datetime.fromtimestamp(
+                    float(labels[label][0])).strftime('%d/%m/%y, %H:%M')
+        for x in range(0, len(old_labels)):
+            old_labels[x] = float(old_labels[x][0])
+        ax.set_xticks(old_labels)
+        ax.set_xticklabels(labels, rotation=15)
+        if save:
+            if not path.exists('./graphs/'):
+                mkdir('graphs')
+            if file_name != '':
+                if (is_valid_filename(file_name)):
+                    try:
+                        fig.savefig('./graphs/' + file_name)
+                        pop_up_window.title('Graph saved')
+                        pop_up_label.configure(text='Graph saved as \''
+                                               + file_name + '\'.')
+                        pop_up_window.geometry('')
+                        pop_up_window.deiconify()
+                    except ValueError:
+                        pop_up_window.title('Invalid format')
+                        pop_up_label.configure(text='The format entered is not'
+                                               + ' supported.\nThe graph was '
+                                               + 'not saved.')
+                        pop_up_window.geometry('')
+                        pop_up_window.deiconify()
+                else:
+                    if sanitize_filename(file_name) != '':
+                        pop_up_window.title('Invalid file name')
+                        pop_up_label.configure(text='The graph was not saved.'
+                                               + '\nDid you mean \''
+                                               + sanitize_filename(file_name)
+                                               + '\'?')
+                        pop_up_window.geometry('')
+                        pop_up_window.deiconify()
+                    else:
+                        pop_up_window.title('Invalid file name')
+                        pop_up_label.configure(text='The graph was not saved.')
+                        pop_up_window.geometry('')
+                        pop_up_window.deiconify()
+            else:
+                fig.savefig('./graphs/graph')
+                pop_up_window.title('Graph saved')
+                pop_up_label.configure(text='Graph saved as \'graph\'.')
+                pop_up_window.geometry('')
+                pop_up_window.deiconify()
+    except Exception:
+        pop_up_window.title('Unable to display graph')
+        pop_up_label.configure(text='The graph could not be created.\nPlease '
+                               + 'consider adjusting the relevant graph '
+                               + 'options.')
+        pop_up_window.geometry('')
+        pop_up_window.deiconify()
 
 
 # Ask for confirmation before closing the program.
@@ -368,8 +387,8 @@ def get_inputs(data, frame, save, ai_response):
             pop_up_window.title('Unable to connect to LLM')
             pop_up_label.configure(text='An error occurred when trying to '
                                    + 'connect to the LLM.\nPlease check that '
-                                   + 'the LLM is set up correctly and that the'
-                                   + ' server address provided is correct.')
+                                   + 'the LLM is set up correctly\nand that '
+                                   + 'the server address provided is correct.')
             pop_up_window.geometry('')
             pop_up_window.deiconify()
 
@@ -567,15 +586,20 @@ def choose_text_colour():
     close_no_button.configure(fg=chosen_text_colour[1])
     close_yes_button.configure(fg=chosen_text_colour[1])
     ai_label.configure(fg=chosen_text_colour[1])
-    ai_text_box.configure(fg=chosen_text_colour[1])
+    ai_text_box.configure(fg=chosen_text_colour[1],
+                          selectforeground=chosen_text_colour[1])
     server_address_label.configure(fg=chosen_text_colour[1])
-    server_address_text_box.configure(fg=chosen_text_colour[1])
+    server_address_text_box.configure(fg=chosen_text_colour[1],
+                                      selectforeground=chosen_text_colour[1])
     max_tokens_label.configure(fg=chosen_text_colour[1])
-    max_tokens_text_box.configure(fg=chosen_text_colour[1])
+    max_tokens_text_box.configure(fg=chosen_text_colour[1],
+                                  selectforeground=chosen_text_colour[1])
     model_label.configure(fg=chosen_text_colour[1])
-    model_text_box.configure(fg=chosen_text_colour[1])
+    model_text_box.configure(fg=chosen_text_colour[1],
+                             selectforeground=chosen_text_colour[1])
     temperature_label.configure(fg=chosen_text_colour[1])
-    temperature_text_box.configure(fg=chosen_text_colour[1])
+    temperature_text_box.configure(fg=chosen_text_colour[1],
+                                   selectforeground=chosen_text_colour[1])
     ai_analysis_button.configure(fg=chosen_text_colour[1])
 
 
@@ -963,7 +987,7 @@ separator.grid(row=0, column=3, rowspan=6, sticky='ns')
 
 # Create the frame for getting inputs from the user.
 input_grid = Frame(frame, height=250, width=300)
-input_grid.grid(row=1, column=5)
+input_grid.grid(row=1, column=5, sticky='w')
 
 # Create the initial graph.
 fig, ax = subplots()
