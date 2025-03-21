@@ -10,6 +10,8 @@
 
     - Using APT (Debian and Debian-based Linux distributions):
         - Install the required packages using: `sudo apt install python3-matplotlib python3-numpy python3-pandas python3-requests tkcalendar python3-pathvalidate`.
+- To use the AI analysis feature, a local LLM is required.
+    - One option is to use LM Studio: https://lmstudio.ai/
 
 ## Running the programs
 
@@ -19,7 +21,7 @@ The back-end collects the appropriate activity data from a Mastodon instance. It
 To run this, use: python3 back-end.py
 
 ### Front-end
-The front-end takes the activity data collected by the back-end and displays it on a graph.
+The front-end takes the activity data collected by the back-end and displays it on a graph. When connected to a local LLM, it can also provide an AI analysis of the displayed data.
 
 To run this, use: python3 front-end.py
 

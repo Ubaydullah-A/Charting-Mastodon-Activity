@@ -1,12 +1,14 @@
 '''
-This program takes the activity data collected by the back-end and displays it
-on a graph.
+The front-end takes the activity data collected by the back-end and displays it
+on a graph. When connected to a local LLM, it can also provide an AI analysis
+of the displayed data.
 
 To run this, use: python3 front-end.py
 '''
 
 from tkinter import (Tk, ttk, Canvas, Text, Button, StringVar, Label, Toplevel,
                      BooleanVar, Checkbutton, Frame, font, Scale, colorchooser)
+from requests import get, post
 from webbrowser import open_new_tab
 
 
@@ -50,14 +52,15 @@ copy_pop_up.withdraw()
 # Create the elements for the welcome window.
 label = Label(welcome_window, font=welcome_font, text='This application takes '
               + 'the activity data of Mastodon instances and displays it on '
-              + 'a graph.\n\nIf you have not collected any activity data, you '
-              + 'can do this using:')
-command = Label(welcome_window, fg="blue", font=welcome_font, text='python3 '
+              + 'a graph.\nWhen connected to a local LLM, it can also provide '
+              + 'an AI analysis of the displayed data.\n\nIf you have not '
+              + 'collected any activity data, you can do this using:')
+command = Label(welcome_window, fg='blue', font=welcome_font, text='python3 '
                 + 'back-end.py')
 label_2 = Label(welcome_window, font=welcome_font, text='\nMore information, '
                 + 'including how to install the required Python packages, can '
                 + 'be found at:')
-link = Label(welcome_window, fg="blue", font=welcome_font, text='https://'
+link = Label(welcome_window, fg='blue', font=welcome_font, text='https://'
              + 'github.com/Ubaydullah-A/Charting-Mastodon-Activity')
 label_3 = Label(welcome_window, font=welcome_font, text='')
 close_button = Button(welcome_window, text='Close', command=lambda:
@@ -70,13 +73,13 @@ label_3.pack()
 close_button.pack()
 
 # Set the initial window size.
-welcome_window.geometry('1050x300')
+welcome_window.geometry('1050x350')
 
 # Call the copy_command function when the command text is clicked.
-command.bind("<Button-1>", lambda e: copy_command(welcome_window))
+command.bind('<Button-1>', lambda e: copy_command(welcome_window))
 
 # Call the open_url function when the URL text is clicked.
-link.bind("<Button-1>", lambda e: open_url('https://github.com/Ubaydullah-A/'
+link.bind('<Button-1>', lambda e: open_url('https://github.com/Ubaydullah-A/'
           + 'Charting-Mastodon-Activity'))
 
 welcome_window.mainloop()
@@ -259,7 +262,7 @@ def create_dataframe(data):
 
 # Get the inputs from the relevant entry elements to provide the required data
 # to create the new graph (and save it if required).
-def get_inputs(data, frame, save):
+def get_inputs(data, frame, save, ai_response):
     # Get the file name.
     file_name = save_text_box.get('1.0', 'end-1c')
     # Create a new DataFrame which only contains the data between midnight of
@@ -279,6 +282,97 @@ def get_inputs(data, frame, save):
         data_df_array[index][1] = \
             data_df_array[index][1][data_df_array[index][1]['week']
                                     .astype(int) < limit2]
+    if ai_response:
+        # Ensure all inputs are valid.
+        llm_input = []
+        temp = []
+        valid_ai_inputs = False
+        server_address_text = server_address_text_box.get('1.0', 'end-1c')
+        model_text = model_text_box.get('1.0', 'end-1c')
+        max_tokens_text = max_tokens_text_box.get('1.0', 'end-1c')
+        temperature_text = temperature_text_box.get('1.0', 'end-1c')
+        try:
+            response = get(f'{server_address_text}/v1/models')
+            if response.status_code == 200:
+                if model_text != '':
+                    if max_tokens_text != '' and max_tokens_text.isdigit():
+                        if temperature_text != '':
+                            try:
+                                float(temperature_text)
+                                valid_ai_inputs = True
+                            except ValueError:
+                                pop_up_window.title('Invalid temperature')
+                                pop_up_label.configure(text='Please enter a '
+                                                       + 'valid temperature '
+                                                       + 'value.')
+                                pop_up_window.geometry('')
+                                pop_up_window.deiconify()
+                                valid_ai_inputs = False
+                        else:
+                            pop_up_window.title('Invalid temperature')
+                            pop_up_label.configure(text='Please enter a valid '
+                                                   + 'temperature value.')
+                            pop_up_window.geometry('')
+                            pop_up_window.deiconify()
+                    else:
+                        pop_up_window.title('Invalid token maximum')
+                        pop_up_label.configure(text='Please enter a valid '
+                                               + 'value for the maximum number'
+                                               + ' of tokens.')
+                        pop_up_window.geometry('')
+                        pop_up_window.deiconify()
+                else:
+                    pop_up_window.title('Invalid model')
+                    pop_up_label.configure(text='Please enter a valid API '
+                                           + 'identifier for the model.')
+                    pop_up_window.geometry('')
+                    pop_up_window.deiconify()
+            else:
+                pop_up_window.title('Invalid response')
+                pop_up_label.configure(text='Unable to get an OK response from'
+                                       + ' the LLM.')
+                pop_up_window.geometry('')
+                pop_up_window.deiconify()
+            if valid_ai_inputs:
+                # Create the array that will provide the data to the LLM.
+                for index in range(len(data_df_array)):
+                    for week in range(len(data_df_array[index][1]['week'])):
+                        instance = data_df_array[index][0]
+                        temp.append('Instance:' + data_df_array[index][0])
+                        week_date = datetime.fromtimestamp(
+                            float(data_df_array[index][1]['week'][week]))\
+                            .strftime('%d/%m/%y')
+                        temp.append('Date:' + week_date)
+                        if show_statuses.get():
+                            statuses = \
+                                (int(data_df_array[index][1]['statuses'][week])
+                                 / int(data_df_array[index][1]['count'][week]))
+                            temp.append('statuses:' + str(statuses))
+                        if show_logins.get():
+                            logins = \
+                                (int(data_df_array[index][1]['logins'][week])
+                                 / int(data_df_array[index][1]['count'][week]))
+                            temp.append('logins:' + str(logins))
+                        if show_registrations.get():
+                            registrations = (int(
+                                    data_df_array[index][1]
+                                    ['registrations'][week])
+                                    / int(data_df_array[index][1]
+                                          ['count'][week]))
+                            temp.append('registrations:' + str(registrations))
+                        llm_input.append(temp)
+                        temp = []
+                get_ai_response(llm_input, max_tokens_text, model_text,
+                                temperature_text, server_address_text)
+        except Exception:
+            pop_up_window.title('Unable to connect to LLM')
+            pop_up_label.configure(text='An error occurred when trying to '
+                                   + 'connect to the LLM.\nPlease check that '
+                                   + 'the LLM is set up correctly and that the'
+                                   + ' server address provided is correct.')
+            pop_up_window.geometry('')
+            pop_up_window.deiconify()
+
     draw_figure(data_df_array, frame, file_name, save)
 
 
@@ -294,6 +388,14 @@ def resize_canvas(event):
     separator.configure(height=root.winfo_height()-16)
 
 
+# Resize the output text box to the correct size when the window changes size.
+def resize_ai_output(event):
+    ai_text_box.configure(state='normal')
+    ai_text_box.configure(width=ai_analysis_window.winfo_width(),
+                          height=ai_analysis_window.winfo_height())
+    ai_text_box.configure(state='disabled')
+
+
 # Track which instances have been selected by updating the selected_instances
 # array.
 def instance_changed(event):
@@ -305,7 +407,7 @@ def instance_changed(event):
             else:
                 selected_instances[index][1] = 0
             break
-    get_inputs(data, frame, False)
+    get_inputs(data, frame, False, False)
 
 
 # Change the font when a new font is selected.
@@ -333,6 +435,10 @@ def font_size_changed(event):
     save_text_box.configure(width=app_width_3)
     font_combobox.configure(width=app_width_4)
     bg_colour_button.configure(width=app_width_4)
+    server_address_text_box.configure(width=app_width_4)
+    model_text_box.configure(width=app_width_4)
+    max_tokens_text_box.configure(width=app_width_4)
+    temperature_text_box.configure(width=app_width_4)
 
 
 # Explicitly change the background colour of every relevant element.
@@ -371,6 +477,9 @@ def choose_bg_colour():
     empty_row_6.configure(bg=chosen_bg_colour[1])
     empty_row_7.configure(bg=chosen_bg_colour[1])
     empty_row_8.configure(bg=chosen_bg_colour[1])
+    empty_row_9.configure(bg=chosen_bg_colour[1])
+    empty_row_10.configure(bg=chosen_bg_colour[1])
+    empty_row_11.configure(bg=chosen_bg_colour[1])
     empty_column_1.configure(bg=chosen_bg_colour[1])
     empty_column_2.configure(bg=chosen_bg_colour[1])
     empty_column_3.configure(bg=chosen_bg_colour[1])
@@ -389,6 +498,17 @@ def choose_bg_colour():
     close_window.configure(bg=chosen_bg_colour[1])
     close_buttons_grid.configure(bg=chosen_bg_colour[1])
     close_label.configure(bg=chosen_bg_colour[1])
+    ai_analysis_window.configure(bg=chosen_bg_colour[1])
+    ai_label.configure(bg=chosen_bg_colour[1])
+    ai_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    server_address_label.configure(bg=chosen_bg_colour[1])
+    server_address_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    max_tokens_label.configure(bg=chosen_bg_colour[1])
+    max_tokens_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    model_label.configure(bg=chosen_bg_colour[1])
+    model_text_box.configure(highlightbackground=chosen_bg_colour[1])
+    temperature_label.configure(bg=chosen_bg_colour[1])
+    temperature_text_box.configure(highlightbackground=chosen_bg_colour[1])
 
 
 # Explicitly change the colour of every relevant input element.
@@ -401,6 +521,11 @@ def choose_input_colour():
     width_text_box.configure(bg=chosen_input_colour[1])
     height_text_box.configure(bg=chosen_input_colour[1])
     save_text_box.configure(bg=chosen_input_colour[1])
+    ai_text_box.configure(bg=chosen_input_colour[1])
+    server_address_text_box.configure(bg=chosen_input_colour[1])
+    max_tokens_text_box.configure(bg=chosen_input_colour[1])
+    model_text_box.configure(bg=chosen_input_colour[1])
+    temperature_text_box.configure(bg=chosen_input_colour[1])
 
 
 # Explicitly change the colour of every relevant text element.
@@ -441,6 +566,17 @@ def choose_text_colour():
     close_label.configure(fg=chosen_text_colour[1])
     close_no_button.configure(fg=chosen_text_colour[1])
     close_yes_button.configure(fg=chosen_text_colour[1])
+    ai_label.configure(fg=chosen_text_colour[1])
+    ai_text_box.configure(fg=chosen_text_colour[1])
+    server_address_label.configure(fg=chosen_text_colour[1])
+    server_address_text_box.configure(fg=chosen_text_colour[1])
+    max_tokens_label.configure(fg=chosen_text_colour[1])
+    max_tokens_text_box.configure(fg=chosen_text_colour[1])
+    model_label.configure(fg=chosen_text_colour[1])
+    model_text_box.configure(fg=chosen_text_colour[1])
+    temperature_label.configure(fg=chosen_text_colour[1])
+    temperature_text_box.configure(fg=chosen_text_colour[1])
+    ai_analysis_button.configure(fg=chosen_text_colour[1])
 
 
 # Explicitly change the colour of every relevant button element.
@@ -456,6 +592,7 @@ def choose_button_colour():
     pop_up_close_button.configure(bg=chosen_button_colour[1])
     close_no_button.configure(bg=chosen_button_colour[1])
     close_yes_button.configure(bg=chosen_button_colour[1])
+    ai_analysis_button.configure(bg=chosen_button_colour[1])
 
 
 # Explicitly change the highlight colour of every relevant element.
@@ -490,6 +627,19 @@ def choose_highlight_colour():
         highlightbackground=chosen_highlight_colour[1])
     close_no_button.configure(highlightbackground=chosen_highlight_colour[1])
     close_yes_button.configure(highlightbackground=chosen_highlight_colour[1])
+    ai_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                          insertbackground=chosen_highlight_colour[1])
+    server_address_text_box.configure(
+        selectbackground=chosen_highlight_colour[1],
+        insertbackground=chosen_highlight_colour[1])
+    max_tokens_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                                  insertbackground=chosen_highlight_colour[1])
+    model_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                             insertbackground=chosen_highlight_colour[1])
+    temperature_text_box.configure(selectbackground=chosen_highlight_colour[1],
+                                   insertbackground=chosen_highlight_colour[1])
+    ai_analysis_button.configure(
+        highlightbackground=chosen_highlight_colour[1])
 
 
 # Hide the pop-up windows to allow for them to be used again.
@@ -500,6 +650,41 @@ def withdraw_pop_ups():
 
 def close_windows():
     exit()
+
+
+# Minimise the AI window to allow for it to be used again.
+def iconify_ai_pop_up():
+    ai_analysis_window.iconify()
+
+
+# Interact with the LLM to provide the data and display the response.
+def get_ai_response(llm_input, max_tokens, model, temperature, server_address):
+    # Define the prompt and parameters
+    payload = {
+        'model': model,
+        'prompt': 'What trends can you find from this data: ' + str(llm_input),
+        'max_tokens': max_tokens,
+        'temperature': temperature
+    }
+
+    # Send the request
+    ai_analysis_window.iconify()
+    response = post(f'{server_address}/v1/completions', json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        ai_text_box.configure(state='normal')
+        ai_text_box.delete('0.0', 'end')
+        ai_text_box.insert(1.0, data.get('choices', [{}])[0]
+                           .get('text', 'No response'))
+        ai_text_box.configure(state='disabled')
+    else:
+        ai_text_box.configure(state='normal')
+        ai_text_box.delete('0.0', 'end')
+        ai_text_box.insert(1.0, 'Error: ' + str(response.status_code) + ' - '
+                           + response.text)
+        ai_text_box.configure(state='disabled')
+    ai_analysis_window.deiconify()
 
 
 # Create the window.
@@ -616,8 +801,8 @@ close_window = Toplevel()
 close_window.title('Quit')
 close_window.attributes('-topmost', 1)
 close_window.protocol('WM_DELETE_WINDOW', withdraw_pop_ups)
-close_label = Label(close_window, font=app_pop_up_font,
-                    text='Do you want to quit?')
+close_label = Label(close_window, font=app_pop_up_font, text='Do you want to '
+                    + 'quit?')
 close_buttons_grid = Frame(close_window)
 close_no_button = Button(close_buttons_grid, text='No', command=lambda:
                          withdraw_pop_ups(), font=app_font, padx=15)
@@ -628,6 +813,19 @@ close_buttons_grid.pack(pady=(0, 25))
 close_no_button.grid(row=0, column=0, padx=10)
 close_yes_button.grid(row=0, column=1)
 close_window.withdraw()
+
+# Create the pop-up for the AI output.
+ai_analysis_window = Toplevel()
+ai_analysis_window.title('AI analysis')
+ai_analysis_window.attributes('-topmost', 1)
+ai_analysis_window.protocol('WM_DELETE_WINDOW', iconify_ai_pop_up)
+ai_label = Label(ai_analysis_window, font=app_pop_up_font,
+                 text='AI analysis response')
+ai_text_box = Text(ai_analysis_window, font=app_textbox_font, state='disabled')
+ai_label.pack(fill='both', expand=True)
+ai_text_box.pack()
+ai_analysis_window.geometry('1050x300')
+ai_analysis_window.iconify()
 
 # Create the elements for the configuration_grid frame.
 window_configuration_label = Label(configuration_grid,
@@ -645,7 +843,7 @@ font_chosen = StringVar()
 font_combobox = ttk.Combobox(configuration_grid, width=30, state='readonly',
                              textvariable=font_chosen, font=app_textbox_font)
 font_combobox['values'] = font_options
-font_combobox.grid(row=2, column=0)
+font_combobox.grid(row=2, column=0, sticky='ew')
 
 change_font_size_label = Label(configuration_grid,
                                text='Select font size:', anchor='w',
@@ -697,6 +895,45 @@ highlight_colour_button = Button(configuration_grid, text='Select highlight '
                                  wraplength=300, font=app_font)
 highlight_colour_button.grid(row=14, column=0, sticky='ew')
 
+empty_row_6 = Label(configuration_grid, text='')
+empty_row_6.grid(row=15, column=0)
+
+server_address_label = Label(configuration_grid, text='Enter server address '
+                             + 'for the AI model: ', wraplength=400,
+                             font=app_font)
+server_address_text_box = Text(configuration_grid, height=1, width=30,
+                               font=app_textbox_font)
+model_label = Label(configuration_grid, text='Enter the model\'s API '
+                    + 'identifier: ', wraplength=400, font=app_font)
+model_text_box = Text(configuration_grid, height=1, width=30,
+                      font=app_textbox_font)
+max_tokens_label = Label(configuration_grid, text='Enter the maximum number of'
+                         + ' tokens: ', wraplength=400, font=app_font)
+max_tokens_text_box = Text(configuration_grid, height=1, width=30,
+                           font=app_textbox_font)
+temperature_label = Label(configuration_grid, text='Enter the temperature '
+                          + 'value: ', wraplength=400, font=app_font)
+temperature_text_box = Text(configuration_grid, height=1, width=30,
+                            font=app_textbox_font)
+ai_analysis_button = Button(configuration_grid, text='Generate AI analysis\n('
+                            + 'window will\nbe temporarily\nunresponsive)',
+                            command=lambda:
+                                get_inputs(data, frame, False, True),
+                                font=app_font, height=4)
+empty_row_7 = Label(configuration_grid, text='')
+empty_row_8 = Label(configuration_grid, text='')
+server_address_label.grid(row=16, column=0, sticky='ew')
+server_address_text_box.grid(row=17, column=0, sticky='ew')
+model_label.grid(row=18, column=0, sticky='ew')
+model_text_box.grid(row=19, column=0, sticky='ew')
+max_tokens_label.grid(row=20, column=0, sticky='ew')
+max_tokens_text_box.grid(row=21, column=0, sticky='ew')
+temperature_label.grid(row=22, column=0, sticky='ew')
+temperature_text_box.grid(row=23, column=0, sticky='ew')
+empty_row_7.grid(row=24, column=0)
+ai_analysis_button.grid(row=25, column=0, sticky='ew')
+empty_row_8.grid(row=26, column=0)
+
 # Add padding around the frames and the separator.
 empty_column_1 = Label(frame, text='', width=2)
 empty_column_1.grid(row=1, column=0)
@@ -710,14 +947,14 @@ empty_column_3.grid(row=1, column=4)
 empty_column_4 = Label(frame, text='', width=2)
 empty_column_4.grid(row=1, column=6)
 
-empty_row_6 = Label(frame, text='')
-empty_row_6.grid(row=0, column=0, columnspan=6)
+empty_row_9 = Label(frame, text='')
+empty_row_9.grid(row=0, column=0, columnspan=6)
 
-empty_row_7 = Label(frame, text='')
-empty_row_7.grid(row=3, column=5)
+empty_row_10 = Label(frame, text='')
+empty_row_10.grid(row=3, column=5)
 
-empty_row_8 = Label(frame, text='')
-empty_row_8.grid(row=5, column=5)
+empty_row_11 = Label(frame, text='')
+empty_row_11.grid(row=5, column=5)
 
 # Create a separator between the configuration_grid frame and the input_grid
 # frame.
@@ -786,7 +1023,7 @@ entries_label = Label(input_grid,
                       anchor='sw', wraplength=800, font=app_font)
 
 entries_button = Button(input_grid, height=6, width=20, text='Enter',
-                        command=lambda: get_inputs(data, frame, False),
+                        command=lambda: get_inputs(data, frame, False, False),
                         font=app_font)
 
 save_label = Label(input_grid,
@@ -796,7 +1033,7 @@ save_text_box = Text(input_grid, height=1, width=88, pady=5, padx=2,
                      font=app_textbox_font)
 save_button = Button(input_grid, height=1, width=20, text='Save graph',
                      font=app_font, command=lambda: get_inputs(data, frame,
-                                                               True))
+                                                               True, False))
 
 # Create the frame for the start and end date selection.
 dates_grid = Frame(input_grid, height=50, width=300)
@@ -880,9 +1117,12 @@ root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0, weight=1)
 
 # Set the initial window size.
-starting_width = frame.winfo_width()+16
+starting_width = frame.winfo_width()+20
 starting_height = frame.winfo_height()+16
 root.geometry(f'{starting_width}x{starting_height}')
+
+# Call the resize_ai_output function when the AI analysis window changes size.
+ai_analysis_window.bind('<Configure>', resize_ai_output)
 
 # Call the resize_canvas function when the window changes size.
 root.bind('<Configure>', resize_canvas)
