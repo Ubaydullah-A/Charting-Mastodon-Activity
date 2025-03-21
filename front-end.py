@@ -987,7 +987,7 @@ separator.grid(row=0, column=3, rowspan=6, sticky='ns')
 
 # Create the frame for getting inputs from the user.
 input_grid = Frame(frame, height=250, width=300)
-input_grid.grid(row=1, column=5)
+input_grid.grid(row=1, column=5, sticky='w')
 
 # Create the initial graph.
 fig, ax = subplots()
