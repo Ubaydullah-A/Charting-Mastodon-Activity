@@ -2,7 +2,7 @@
 
 ## Installing the required software
 - Download the files from the repository.
-- Ensure Python is installed. Python 3.12.7 was used to create the programs.
+- Ensure Python is installed.
 - Install the required Python packages:
     - Using PIP:
         - Install PIP by following these instructions: https://packaging.python.org/en/latest/guides/installing-using-linux-tools/
@@ -29,3 +29,9 @@ To run this, use: python3 front-end.py
 The data-conversion tool converts data collected before v1.3.0 to the new naming scheme, and stores it in the correct directory. If data has already been collected using v1.3.0 or later, this tool will merge the data files.
 
 To run this, use: python3 data-conversion.py
+
+## Notices
+
+- Python 3.12.7 was used to create the programs.
+- The programs have only been tested using Kubuntu 24.10.
+- The AI analysis feature has only been tested using LM Studio.
